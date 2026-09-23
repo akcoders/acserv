@@ -33,7 +33,6 @@ use App\Models\TaxProfile;
 use App\Models\TechnicianProfile;
 use App\Models\Tenant;
 use App\Models\Testimonial;
-use App\Models\User;
 use App\Support\TenantContext;
 use Illuminate\Database\Seeder;
 
@@ -49,16 +48,18 @@ class OperationsDemoSeeder extends Seeder
         try {
             $branch = $tenant->branches()->firstOrFail();
             $branch->update(['latitude' => 19.0760000, 'longitude' => 72.8777000]);
-            $technician = User::factory()->for($tenant)->create([
+            $technician = $tenant->users()->make([
                 'first_name' => 'Demo', 'last_name' => 'Technician',
                 'email' => config('acserv.demo_login.technician_email'), 'phone' => '+919999999901',
                 'role' => Role::Technician, 'status' => UserStatus::Active,
             ]);
-            $customerUser = User::factory()->for($tenant)->create([
+            $technician->forceFill(['email_verified_at' => now(), 'phone_verified_at' => now()])->save();
+            $customerUser = $tenant->users()->make([
                 'first_name' => 'Demo', 'last_name' => 'Customer',
                 'email' => config('acserv.demo_login.customer_email'), 'phone' => '+919999999902',
                 'role' => Role::Customer, 'status' => UserStatus::Active,
             ]);
+            $customerUser->forceFill(['email_verified_at' => now(), 'phone_verified_at' => now()])->save();
             $customer = Customer::query()->firstOrFail();
             $customer->update(['user_id' => $customerUser->getKey()]);
             $asset = $customer->assets()->firstOrFail();

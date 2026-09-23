@@ -1,0 +1,221 @@
+:root {
+    --installer-ink: #14243d;
+    --installer-muted: #61728a;
+    --installer-line: #dce6f2;
+    --installer-accent: #2165e5;
+}
+
+body.installer-body,
+body:has(#installer-form),
+body:has(#installer-unlock-form) {
+    min-height: 100vh;
+    color: var(--installer-ink);
+    background:
+        radial-gradient(circle at 8% 6%, rgba(55, 156, 238, 0.2), transparent 29rem),
+        radial-gradient(circle at 100% 80%, rgba(34, 192, 179, 0.14), transparent 31rem),
+        #f3f7fc;
+}
+
+.installer-shell {
+    width: min(100% - 2rem, 1300px);
+    margin-inline: auto;
+    padding-block: clamp(1.5rem, 5vw, 4.5rem);
+}
+
+.installer-card {
+    overflow: hidden;
+    border: 1px solid rgba(194, 211, 231, 0.8);
+    border-radius: 1.35rem;
+    background: #fff;
+    box-shadow: 0 1.5rem 4rem rgba(21, 48, 83, 0.09);
+}
+
+.installer-sidebar {
+    position: relative;
+    isolation: isolate;
+    min-height: 100%;
+    padding: clamp(1.75rem, 3.5vw, 3rem);
+    color: #fff;
+    background: linear-gradient(155deg, #0a2442 0%, #16477e 65%, #0c796d 135%);
+}
+
+.installer-sidebar::before,
+.installer-sidebar::after {
+    position: absolute;
+    z-index: -1;
+    border-radius: 50%;
+    content: '';
+}
+
+.installer-sidebar::before {
+    top: -6rem;
+    right: -6rem;
+    width: 20rem;
+    height: 20rem;
+    border: 2.5rem solid rgba(255, 255, 255, 0.045);
+}
+
+.installer-sidebar::after {
+    right: -9rem;
+    bottom: -11rem;
+    width: 26rem;
+    height: 26rem;
+    background: rgba(72, 205, 194, 0.11);
+}
+
+.installer-sidebar .text-muted,
+.installer-sidebar .text-secondary {
+    color: rgba(255, 255, 255, 0.72) !important;
+}
+
+.installer-brand-mark {
+    display: inline-grid;
+    width: 3.5rem;
+    height: 3.5rem;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.13);
+    font-size: 1.8rem;
+}
+
+.installer-eyebrow {
+    color: #1765dc;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+}
+
+.installer-sidebar .installer-eyebrow {
+    color: #9de6f5;
+}
+
+.installer-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.9rem;
+    padding: 0.8rem 0;
+}
+
+.installer-step + .installer-step {
+    border-top: 1px solid rgba(255, 255, 255, 0.13);
+}
+
+.installer-step-number {
+    display: inline-grid;
+    flex: 0 0 2rem;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    border-radius: 0.65rem;
+    background: rgba(255, 255, 255, 0.16);
+    font-size: 0.78rem;
+    font-weight: 800;
+}
+
+.installer-main {
+    padding: clamp(1.5rem, 4vw, 3.5rem);
+}
+
+.installer-section {
+    padding: 1.4rem 0;
+    border-top: 1px solid var(--installer-line);
+}
+
+.installer-section:first-of-type {
+    padding-top: 0;
+    border-top: 0;
+}
+
+.installer-section-title {
+    margin-bottom: 0.2rem;
+    font-size: 1.02rem;
+    font-weight: 750;
+}
+
+.installer-section-copy,
+.installer-help {
+    color: var(--installer-muted);
+    font-size: 0.86rem;
+}
+
+#installer-form .form-label,
+#installer-unlock-form .form-label {
+    margin-bottom: 0.4rem;
+    color: #29405d;
+    font-size: 0.83rem;
+    font-weight: 700;
+}
+
+#installer-form .form-control,
+#installer-form .form-select,
+#installer-unlock-form .form-control {
+    min-height: 2.9rem;
+    padding: 0.67rem 0.85rem;
+    border-color: #d5dfec;
+    border-radius: 0.65rem;
+    color: var(--installer-ink);
+    background-color: #fbfdff;
+}
+
+#installer-form .form-control:focus,
+#installer-form .form-select:focus,
+#installer-unlock-form .form-control:focus {
+    border-color: #75a5f6;
+    background-color: #fff;
+    box-shadow: 0 0 0 0.22rem rgba(33, 101, 229, 0.12);
+}
+
+#installer-form .form-control.is-invalid,
+#installer-unlock-form .form-control.is-invalid {
+    border-color: #dc3545;
+}
+
+#installer-form .form-check-input:checked {
+    border-color: var(--installer-accent);
+    background-color: var(--installer-accent);
+}
+
+.installer-note {
+    padding: 0.9rem 1rem;
+    border: 1px solid #d5e5fa;
+    border-radius: 0.75rem;
+    color: #355376;
+    background: #f3f8ff;
+    font-size: 0.87rem;
+}
+
+.installer-status {
+    min-height: 1.5rem;
+    color: var(--installer-muted);
+    font-size: 0.85rem;
+}
+
+.installer-status[data-state='error'] {
+    color: #b42336;
+}
+
+.installer-status[data-state='success'] {
+    color: #15755c;
+}
+
+.installer-submit {
+    min-height: 3rem;
+    padding-inline: 1.6rem;
+    border-radius: 0.7rem;
+    font-weight: 700;
+    box-shadow: 0 0.45rem 1.1rem rgba(33, 101, 229, 0.22);
+}
+
+[data-demo-fields][hidden],
+#demo-fields[hidden],
+[data-live-fields][hidden] {
+    display: none !important;
+}
+
+@media (max-width: 991.98px) {
+    .installer-sidebar {
+        min-height: auto;
+    }
+}

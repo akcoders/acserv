@@ -27,6 +27,21 @@
     "file": "assets/instrument-sans-600-normal-B9e8oLYv.woff",
     "src": "_instrument-sans-600-normal-B9e8oLYv.woff"
   },
+  "_sweetalert2-BY8NMNlz.css": {
+    "file": "assets/sweetalert2-BY8NMNlz.css",
+    "src": "_sweetalert2-BY8NMNlz.css"
+  },
+  "_sweetalert2.all-DU56UiTv.js": {
+    "file": "assets/sweetalert2.all-DU56UiTv.js",
+    "name": "sweetalert2.all",
+    "css": [
+      "assets/sweetalert2-BY8NMNlz.css"
+    ],
+    "assets": [
+      "assets/bootstrap-icons-mSm7cUeB.woff2",
+      "assets/bootstrap-icons-BeopsB42.woff"
+    ]
+  },
   "node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff": {
     "file": "assets/bootstrap-icons-BeopsB42.woff",
     "src": "node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff"
@@ -36,16 +51,27 @@
     "src": "node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff2"
   },
   "resources/js/app.js": {
-    "file": "assets/app-ANSwGp0Q.js",
+    "file": "assets/app-f_y-zAbX.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
-    "css": [
-      "assets/app-SG7HLnvr.css"
+    "imports": [
+      "_sweetalert2.all-DU56UiTv.js"
     ],
-    "assets": [
-      "assets/bootstrap-icons-mSm7cUeB.woff2",
-      "assets/bootstrap-icons-BeopsB42.woff"
+    "css": [
+      "assets/app-D0Fni7Z2.css"
+    ]
+  },
+  "resources/js/installer.js": {
+    "file": "assets/installer-BqiVYlI6.js",
+    "name": "installer",
+    "src": "resources/js/installer.js",
+    "isEntry": true,
+    "imports": [
+      "_sweetalert2.all-DU56UiTv.js"
+    ],
+    "css": [
+      "assets/installer-B7qS7KLi.css"
     ]
   }
 }
