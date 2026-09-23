@@ -15,7 +15,7 @@ The application is one Laravel codebase designed for Hostinger shared hosting. I
 
 ## Current instruction
 
-Phase 2 through Phase 7 development is implemented. The current enhancement adds payment collection/office verification, image-rich PDFs, an admin job record, inventory visibility, and a shared-hosting installer. Local automated checks are being completed before the first GitHub push; live SMTP/UPI setup and browser sign-off still require the real server.
+Phase 2 through Phase 7 development is implemented. The current enhancement adds payment collection/office verification, image-rich PDFs, an admin job record, inventory visibility, and a shared-hosting installer. Local automated checks pass and the application is pushed to GitHub; live SMTP/UPI setup and browser sign-off still require the real server.
 
 ## Guided field-job enhancement
 
@@ -171,4 +171,4 @@ Phase 1 passkeys/biometric unlock, invitations, registration, and its remaining 
 
 ## Repository
 
-The application is prepared for the `akcoders/acserv` GitHub repository on `main`. Compiled `public/build` assets are included for Hostinger; `.env`, logs, `vendor`, and `node_modules` remain excluded. Live server values and a real UPI QR are configured after deployment, not committed.
+The application is pushed to `akcoders/acserv` on `main`. Compiled `public/build` assets are included for Hostinger; `.env`, logs, `vendor`, and `node_modules` remain excluded. Live server values and a real UPI QR are configured after deployment, not committed.
