@@ -1,0 +1,11 @@
+{
+    "name": "ACServ Field Service",
+    "short_name": "ACServ",
+    "start_url": "/login",
+    "display": "standalone",
+    "background_color": "#071525",
+    "theme_color": "#0d6efd",
+    "icons": [
+        { "src": "/favicon.ico", "sizes": "48x48", "type": "image/x-icon" }
+    ]
+}

@@ -1,0 +1,4 @@
+@extends('layouts.app')
+@section('title', ($post->meta_title ?: $post->title).' — '.__('app.name'))
+@push('head')<meta name="description" content="{{ $post->meta_description ?: $post->excerpt }}"><link rel="canonical" href="{{ route('website.post', $post->slug) }}"><meta property="og:title" content="{{ $post->title }}"><meta property="og:description" content="{{ $post->meta_description ?: $post->excerpt }}">@if($post->featuredMedia)<meta property="og:image" content="{{ Storage::disk($post->featuredMedia->disk)->url($post->featuredMedia->path) }}">@endif@endpush
+@section('content')<article class="container py-5 public-content"><header class="mx-auto py-4"><div class="text-primary fw-semibold mb-2">{{ $post->category ?: 'AC care' }}</div><h1 class="display-5 fw-bold">{{ $post->title }}</h1><p class="text-secondary">Published {{ $post->published_at?->format('d M Y') }}</p></header><div class="mx-auto fs-5 lh-lg">{!! nl2br(e($post->body)) !!}</div></article>@endsection
