@@ -74,7 +74,7 @@
             </form>
         </div>
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+            <table class="table table-hover align-middle mb-0" data-rich-table="server">
                 <thead><tr><th>Job</th><th>Customer</th><th>Technician</th><th>Scheduled</th><th>Stage</th><th>Evidence</th><th class="text-end" data-unsortable>Actions</th></tr></thead>
                 <tbody>
                     @forelse ($jobs as $job)

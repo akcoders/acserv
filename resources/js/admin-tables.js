@@ -17,7 +17,8 @@ export function bindRichTables(root = document) {
         const $table = $(this);
         const $body = $table.find('tbody');
         const $shell = $table.closest('.table-responsive');
-        const hasServerPagination = $table.closest('.card').find('.pagination, nav[aria-label*="Pagination"]').length > 0;
+        const hasServerPagination = this.dataset.richTable === 'server'
+            || $table.closest('.card').find('.pagination, nav[aria-label*="Pagination"]').length > 0;
         const $placeholderRows = $body.children('tr').filter(function () {
             return $(this).children('td').length === 1 && Number($(this).children('td').first().attr('colspan')) > 1;
         });
@@ -26,31 +27,31 @@ export function bindRichTables(root = document) {
         $placeholderRows.remove();
         $shell.removeClass('table-responsive').addClass('rich-table-shell');
 
-        if (hasServerPagination) {
-            $('<p>', {
-                class: 'table-page-scope small text-secondary px-4 pt-2 mb-0',
-                text: 'Search and sort the records on this page. Use the filters above to search all records.',
-            }).insertBefore($shell);
-        }
-
         const nonSortableColumns = $table.find('thead th').toArray()
-            .flatMap((header, index) => header.hasAttribute('data-unsortable') ? [index] : []);
+            .flatMap((header, index) => header.hasAttribute('data-unsortable')
+                || ['', 'action', 'actions'].includes(header.textContent.trim().toLowerCase()) ? [index] : []);
+        const showClientControls = !hasServerPagination && $body.children('tr').length > 10;
 
         $table.DataTable({
             autoWidth: false,
             responsive: true,
             order: [],
-            pageLength: 10,
-            lengthMenu: [10, 20, 50],
-            paging: ! hasServerPagination,
+            pageLength: 20,
+            lengthMenu: [20, 50, 100],
+            paging: showClientControls,
+            searching: showClientControls,
+            info: showClientControls,
+            layout: showClientControls
+                ? { topStart: null, topEnd: 'search', bottomStart: 'info', bottomEnd: 'paging' }
+                : { topStart: null, topEnd: null, bottomStart: null, bottomEnd: null },
             columnDefs: nonSortableColumns.length ? [{ targets: nonSortableColumns, orderable: false }] : [],
             language: {
-                search: 'Search loaded rows:',
-                searchPlaceholder: 'Find in this page',
-                info: 'Showing _START_–_END_ of _TOTAL_ loaded rows',
-                infoEmpty: 'No loaded rows',
+                search: '',
+                searchPlaceholder: 'Search this table',
+                info: '_START_–_END_ of _TOTAL_ records',
+                infoEmpty: 'No records',
                 emptyTable: emptyMessage,
-                zeroRecords: 'No matching rows on this page.',
+                zeroRecords: 'No matching records.',
             },
         });
     });

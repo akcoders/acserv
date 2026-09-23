@@ -7,6 +7,10 @@
     <meta name="theme-color" content="#0b2342">
     <meta name="push-public-key" content="{{ config('services.push.public_key') }}">
     <meta name="push-subscription-url" content="{{ route('push-subscriptions.store') }}">
+    @if(filled(config('services.onesignal.app_id')) && filled(config('services.onesignal.api_key')))
+        <meta name="onesignal-app-id" content="{{ config('services.onesignal.app_id') }}">
+        <meta name="onesignal-external-id" content="{{ auth()->id() }}">
+    @endif
     <link rel="manifest" href="/manifest.webmanifest">
     <title>@yield('title', __('app.name'))</title>
     @vite('resources/js/app.js')

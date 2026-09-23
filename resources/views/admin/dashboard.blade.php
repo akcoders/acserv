@@ -137,7 +137,7 @@
             @endif
         </div>
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+            <table class="table table-hover align-middle mb-0" data-rich-table="server">
                 <thead><tr><th>Job</th><th>Customer</th><th>Technician</th><th>Schedule</th><th>Status</th></tr></thead>
                 <tbody>
                     @forelse ($recentJobs as $job)

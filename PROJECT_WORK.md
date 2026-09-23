@@ -15,7 +15,7 @@ The application is one Laravel codebase designed for Hostinger shared hosting. I
 
 ## Current instruction
 
-Phase 2 through Phase 7 development is implemented. The current enhancement adds payment collection/office verification, image-rich PDFs, an admin job record, inventory visibility, and a shared-hosting installer. Local automated checks pass and the application is pushed to GitHub; live SMTP/UPI setup and browser sign-off still require the real server.
+Phase 2 through Phase 7 development is implemented. This release adds one-page customer-signed invoices, compact job cards, a booking calendar and quick customer creation, purchase/vendor and operational accounts/P&L, employee/pay-grade and salary-slip management, customer-feedback follow-up, richer customer/technician PWA screens, OneSignal web push, and expanded installer demo data. Hostinger remains the deployment target; live SMTP/UPI/OneSignal credentials and browser sign-off still require the real server.
 
 ## Guided field-job enhancement
 
@@ -28,7 +28,7 @@ Phase 2 through Phase 7 development is implemented. The current enhancement adds
 - [x] Office verification or rejection of collection; only verification completes the job, records the payment, and generates the paid invoice.
 - [x] Automatic, idempotent invoice generation with net consumed parts and tax after payment verification.
 - [x] Detailed admin job page with work timeline, all field photos, customer signatures, parts, payment proof, and final manager verification.
-- [x] Image-rich, multi-page job-card and invoice PDFs with customer signatures; job card also includes field photos and full work details.
+- [x] Fixed one-page A4 invoice with one final customer signature; compact job-card pages retain work details, used parts, field photos and signatures without empty filler pages.
 - [x] Manager transitions cannot skip the technician stages; dispatch is locked after acceptance.
 - [x] Rich admin pipeline board, analytics cards, DataTables-enhanced registers, mobile technician worklist, and customer service timeline.
 - [x] Bundled Bootstrap, jQuery DataTables, AJAX, and SweetAlert assets for deployment without a production Node server or a runtime CDN.
@@ -64,6 +64,8 @@ Phase 2 through Phase 7 development is implemented. The current enhancement adds
 - [x] Razorpay order API, signed customer checkout confirmation, and signed webhook settlement.
 - [x] Admin-configurable UPI QR, mandatory UPI transaction screenshot, cash collection, rejection/resubmission, and one-time admin payment verification.
 - [x] Inventory register displays job-consumed quantity and remaining stock; consumed parts create outgoing movements and returns restore stock.
+- [x] Vendor directory, purchase orders and line receipts; receiving stock is idempotent and supplier payments are tracked against the outstanding balance.
+- [x] Accounts cashbook and operational P&L for invoiced sales, net consumed-parts cost, operating expenses and processed payroll. This is not a double-entry general ledger or GST settlement engine.
 
 ### Phase 4 — Customer PWA and notification engine
 
@@ -73,6 +75,8 @@ Phase 2 through Phase 7 development is implemented. The current enhancement adds
 - [x] Browser push subscription storage with encrypted endpoint/key fields.
 - [x] Booking confirmation and job status notifications.
 - [x] Negative-feedback manager escalation.
+- [x] Feedback dashboard for admin/manager follow-up and resolution; customers see a submitted rating rather than a duplicate feedback form.
+- [x] OneSignal Web SDK v16 with a dedicated service-worker scope and queued, user-targeted REST push; the existing generic push adapter remains a fallback.
 - [x] Next-service, warranty-expiry, and AMC-expiry reminder generation plus scheduled delivery.
 - [x] Shared-hosting-safe polling in place of a persistent real-time socket server.
 
@@ -85,6 +89,8 @@ Phase 2 through Phase 7 development is implemented. The current enhancement adds
 - [x] Technician payout statements, payslip PDF, dispute submission, and manager resolution.
 - [x] Nightly technician scorecards for completed jobs, ratings, SLA, attendance, and weighted score.
 - [x] Leave-review and payout-ready notifications.
+- [x] Employee directory with login role, designation, pay grade, reporting manager, branch, monthly salary and technician per-job incentive.
+- [x] Salary slips include prorated base salary plus job/hour earnings; duplicate payout periods are rejected so P&L cannot double-count payroll.
 
 ### Phase 6 — CMS and public website
 
@@ -107,6 +113,7 @@ Phase 2 through Phase 7 development is implemented. The current enhancement adds
 - [x] Hostinger scheduler configuration with bounded `queue:work --stop-when-empty` runs.
 - [x] Hostinger deployment, cron, storage, external-provider, health, and disaster-recovery instructions in `README.md`.
 - [x] Idempotent `acserv:install` command for Hostinger/MySQL, with safe demo or live workspace creation, runtime preflight, assets, storage, migrations, and caches.
+- [x] Demo installer also seeds a vendor, received purchase/stock receipt, sample account entries and technician employment profile.
 
 ## Shared application architecture
 
@@ -128,6 +135,7 @@ Tenant identity is always derived from the authenticated user or configured publ
 - Queue work is processed in bounded cron-triggered runs; Supervisor is not required.
 - Production assets are compiled before upload if the Hostinger plan does not provide Node/npm.
 - Push, camera, location, service workers, and secure payments require HTTPS.
+- OneSignal needs an app ID, REST API key and a same-origin `/onesignal/OneSignalSDKWorker.js` on the production HTTPS domain. Keys stay in server `.env`.
 - Realtime customer tracking uses shared-hosting-safe HTTP polling.
 
 ## Local URL and demo access
@@ -152,7 +160,8 @@ When `MAIL_MAILER=log`, the OTP is written to `storage/logs/laravel.log`. No tes
 - [x] Build production frontend assets locally.
 - [x] Apply Laravel Pint formatting to all PHP files changed for this enhancement.
 - [x] Exercise the admin main pages, booking CRUD, job creation/dispatch/open, inventory CRUD/stock movements/consumption, payment verification, evidence access, and PDF image embedding with feature tests.
-- [x] Run the full PHPUnit suite (37 tests, 251 assertions passing).
+- [x] Run the expanded PHPUnit suite: 58 tests / 417 assertions passing, including PDF, booking, purchases/accounts, employee/payroll, feedback and OneSignal push flows.
+- [x] Apply new purchase/account, employment and payroll-uniqueness migrations to local MySQL; seed representative new-module demo records.
 - [x] Build and commit-ready production frontend assets for Hostinger (no server-side Node.js build).
 - [ ] Run fresh MySQL migrations and all seeders in a separate disposable database.
 - [ ] Verify all three OTP logins and role redirects.

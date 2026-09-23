@@ -8,6 +8,11 @@
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#templateModal">New template</button>
     </div>
 
+    <div class="alert {{ filled(config('services.onesignal.app_id')) && filled(config('services.onesignal.api_key')) ? 'alert-success' : 'alert-warning' }} d-flex align-items-start gap-3 mb-4" role="status">
+        <i class="bi bi-broadcast fs-4" aria-hidden="true"></i>
+        <div><strong>OneSignal web push {{ filled(config('services.onesignal.app_id')) && filled(config('services.onesignal.api_key')) ? 'configured' : 'needs setup' }}</strong><div class="small mt-1">{{ filled(config('services.onesignal.app_id')) && filled(config('services.onesignal.api_key')) ? 'Technician and customer browsers can subscribe through the bell in their portals. Delivery appears in the log below.' : 'Add ONESIGNAL_APP_ID and ONESIGNAL_REST_API_KEY to the server .env, then rebuild the Laravel config cache. HTTPS is required.' }}</div></div>
+    </div>
+
     <div class="row g-4 mb-4">
         <div class="col-xl-5">
             <div class="card content-card h-100">

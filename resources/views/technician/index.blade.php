@@ -8,27 +8,39 @@
     $workingCount = $jobs->filter(fn ($job) => in_array($job->status->value, ['ACCEPTED', 'EN_ROUTE', 'REACHED', 'INSPECTED', 'AUTHORIZED', 'IN_PROGRESS'], true))->count();
     $completedCount = $jobs->filter(fn ($job) => in_array($job->status->value, ['COMPLETED', 'VERIFIED'], true))->count();
     $todayCount = $jobs->filter(fn ($job) => $job->scheduled_at?->isToday())->count();
+    $nextJob = $jobs->first(fn ($job) => ! in_array($job->status->value, ['COMPLETED', 'VERIFIED'], true));
 @endphp
 
 @push('head')
 <style>
-    .technician-home .home-hero { background: linear-gradient(130deg, #082a53 0%, #1168c7 100%); color: #fff; }
+    .technician-home .home-hero { position: relative; border: 0; background: linear-gradient(125deg, #082442 0%, #0b5aa8 65%, #168bb2 100%); color: #fff; }
+    .technician-home .home-hero::after { content: ''; position: absolute; width: 18rem; height: 18rem; border: 1px solid rgba(255,255,255,.15); border-radius: 50%; right: -5rem; top: -9rem; box-shadow: 0 0 0 4rem rgba(255,255,255,.035); pointer-events: none; }
+    .technician-home .home-hero .card-body { position: relative; z-index: 1; }
     .technician-home .home-hero .hero-muted { color: rgba(255, 255, 255, .75); }
+    .technician-home .hero-kicker { letter-spacing: .14em; color: #91e9ff; }
+    .technician-home .hero-stat { border: 1px solid rgba(255,255,255,.17); background: rgba(255,255,255,.1); backdrop-filter: blur(5px); }
     .technician-home .summary-icon { width: 2.8rem; height: 2.8rem; display: inline-grid; place-items: center; border-radius: .85rem; background: #eaf4ff; color: #0d6efd; font-size: 1.35rem; }
-    .technician-home .summary-card { min-height: 8rem; }
+    .technician-home .summary-card { min-height: 8rem; border: 1px solid #dce9f6; box-shadow: 0 8px 24px rgba(13,47,87,.04); }
     .technician-home .job-progress { height: .4rem; min-width: 6rem; }
     .technician-home .table td { vertical-align: middle; }
     .technician-home .job-number { letter-spacing: .02em; }
     .technician-home .section-heading { border-left: 4px solid #0d6efd; padding-left: .75rem; }
     .technician-home .attendance-panel { background: #f5f9ff; border: 1px solid #dceafb; border-radius: .85rem; }
+    .technician-home .priority-card { border: 1px solid #b8d9f7; background: linear-gradient(115deg, #f2f9ff, #fff); }
+    .technician-home .job-mobile-card { border: 1px solid #dce9f6; border-radius: 1.1rem; background: #fff; box-shadow: 0 6px 18px rgba(15,53,95,.045); }
+    .technician-home .job-mobile-card.is-new { border-color: #e8c774; background: linear-gradient(130deg, #fffaf0, #fff); }
+    .technician-home .job-mobile-card .job-progress { height: .45rem; }
+    .technician-home .utility-card { border: 1px solid #dce9f6; }
+    @media (max-width: 575.98px) { .technician-home .home-hero .card-body { padding: 1.4rem !important; } .technician-home .summary-card .card-body { padding: .9rem !important; } .technician-home .summary-card { min-height: 7rem; } .technician-home .summary-card .h3 { font-size: 1.35rem; } }
 </style>
 @endpush
 
 @section('content')
 <div class="technician-home mx-auto" style="max-width: 1320px">
     <div class="card content-card home-hero overflow-hidden mb-4"><div class="card-body p-4 p-md-5">
-        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap"><div><div class="hero-muted fw-semibold small text-uppercase mb-1">Field service workspace</div><h1 class="h2 mb-1">My workday</h1><div class="hero-muted">{{ now()->format('l, d F Y') }} · {{ $profile?->branch?->name ?? 'Branch not configured' }}</div></div><span class="badge rounded-pill bg-{{ $profile?->is_available ? 'success' : 'secondary' }} px-3 py-2"><i class="bi bi-circle-fill me-1" style="font-size: .5rem"></i>{{ $profile?->is_available ? 'Available' : 'Unavailable' }}</span></div>
-        <div class="row g-3 mt-3"><div class="col-sm-6 col-lg-4"><div class="rounded-4 bg-white bg-opacity-10 p-3 h-100"><div class="hero-muted small">Next action</div><strong class="fs-5">{{ $waitingCount > 0 ? 'Accept a new job' : ($workingCount > 0 ? 'Continue an active job' : 'All caught up') }}</strong></div></div><div class="col-sm-6 col-lg-4"><div class="rounded-4 bg-white bg-opacity-10 p-3 h-100"><div class="hero-muted small">Attendance</div><strong class="fs-5">{{ $attendance?->checked_out_at ? 'Shift completed' : ($attendance?->checked_in_at ? 'Checked in' : 'Check in to start') }}</strong></div></div><div class="col-lg-4"><div class="rounded-4 bg-white bg-opacity-10 p-3 h-100"><div class="hero-muted small">Assigned work</div><strong class="fs-5">{{ $jobs->count() }} {{ str('job')->plural($jobs->count()) }} in your queue</strong></div></div></div>
+        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap"><div><div class="hero-kicker fw-bold small text-uppercase mb-1">Field service workspace</div><h1 class="display-6 fw-bold mb-1">Ready for your workday?</h1><div class="hero-muted">{{ now()->format('l, d F Y') }} · {{ $profile?->branch?->name ?? 'Branch not configured' }}</div></div><div class="d-flex flex-wrap gap-2"><span class="badge rounded-pill bg-white text-primary px-3 py-2" data-connectivity>Checking connection</span><span class="badge rounded-pill bg-{{ $profile?->is_available ? 'success' : 'secondary' }} px-3 py-2"><i class="bi bi-circle-fill me-1" style="font-size: .5rem"></i>{{ $profile?->is_available ? 'Available' : 'Unavailable' }}</span></div></div>
+        <div class="d-flex flex-wrap gap-2 mt-4"><a class="btn btn-info fw-semibold" href="#assigned-jobs"><i class="bi bi-briefcase me-1"></i>Open my jobs</a><button class="btn btn-outline-light" type="button" data-install-app><i class="bi bi-phone me-1"></i>Install field app</button></div>
+        <div class="row g-3 mt-3"><div class="col-sm-6 col-lg-4"><div class="hero-stat rounded-4 p-3 h-100"><div class="hero-muted small">Next action</div><strong class="fs-5">{{ $waitingCount > 0 ? 'Accept a new job' : ($workingCount > 0 ? 'Continue an active job' : 'All caught up') }}</strong></div></div><div class="col-sm-6 col-lg-4"><div class="hero-stat rounded-4 p-3 h-100"><div class="hero-muted small">Attendance</div><strong class="fs-5">{{ $attendance?->checked_out_at ? 'Shift completed' : ($attendance?->checked_in_at ? 'Checked in' : 'Check in to start') }}</strong></div></div><div class="col-lg-4"><div class="hero-stat rounded-4 p-3 h-100"><div class="hero-muted small">Assigned work</div><strong class="fs-5">{{ $jobs->count() }} {{ str('job')->plural($jobs->count()) }} in your queue</strong></div></div></div>
     </div></div>
 
     <div class="row g-3 mb-4">
@@ -38,10 +50,33 @@
         <div class="col-6 col-lg-3"><div class="card content-card summary-card h-100"><div class="card-body"><span class="summary-icon"><i class="bi bi-check-circle"></i></span><div class="h3 fw-bold mb-0 mt-2">{{ $completedCount }}</div><div class="text-secondary small">Completed in queue</div></div></div></div>
     </div>
 
+    @if($nextJob)
+        <section class="card priority-card rounded-4 mb-4"><div class="card-body p-3 p-sm-4"><div class="d-flex align-items-center justify-content-between gap-3 flex-wrap"><div><div class="small fw-bold text-primary text-uppercase mb-1" style="letter-spacing: .1em"><i class="bi bi-lightning-charge-fill me-1"></i>Focus next</div><h2 class="h5 fw-bold mb-1">{{ $nextJob->service_type }}</h2><div class="text-secondary small">{{ $nextJob->job_number }} · {{ $nextJob->customer->name }} @if($nextJob->scheduled_at)· {{ $nextJob->scheduled_at->format('d M, g:i A') }}@endif</div></div><a class="btn btn-primary" href="{{ route('technician.jobs.show', $nextJob) }}">{{ $nextJob->status->value === 'ASSIGNED' ? 'Review and accept' : 'Continue job' }} <i class="bi bi-arrow-right ms-1"></i></a></div></div></section>
+    @endif
+
     <div class="card content-card mb-4" id="assigned-jobs"><div class="card-body p-4">
         <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap mb-3"><div><h2 class="h4 section-heading mb-1">Assigned jobs</h2><div class="text-secondary small">Open a job to follow its guided service pipeline.</div></div><span class="badge rounded-pill text-bg-primary px-3 py-2">{{ $jobs->count() }} total</span></div>
         @if($jobs->isNotEmpty())
-            <div class="table-responsive"><table class="table table-hover align-middle w-100" data-rich-table><thead class="table-light"><tr><th>Job</th><th>Customer</th><th>Schedule</th><th>Pipeline</th><th>Next action</th><th class="text-end">Open</th></tr></thead><tbody>
+            <div class="vstack gap-3 d-lg-none">
+                @foreach($jobs as $job)
+                    @php
+                        $mobileStatus = $job->status->value;
+                        $mobileProgress = match ($mobileStatus) {
+                            'ASSIGNED' => 14, 'ACCEPTED', 'EN_ROUTE' => 29, 'REACHED' => 43, 'INSPECTED' => 57, 'AUTHORIZED' => 71, 'IN_PROGRESS' => 86, default => 100,
+                        };
+                        $mobileAction = match ($mobileStatus) {
+                            'ASSIGNED' => 'Review and accept', 'ACCEPTED', 'EN_ROUTE' => 'Confirm arrival', 'REACHED' => 'Inspect & photograph', 'INSPECTED' => 'Get approval', 'AUTHORIZED' => 'Start work', 'IN_PROGRESS' => 'Finish & sign off', default => 'View job',
+                        };
+                    @endphp
+                    <article class="job-mobile-card p-3 {{ $mobileStatus === 'ASSIGNED' ? 'is-new' : '' }}">
+                        <div class="d-flex justify-content-between align-items-start gap-2"><div><div class="small fw-bold text-primary mb-1">{{ $job->job_number }}</div><h3 class="h6 fw-bold mb-0">{{ $job->service_type }}</h3></div><span class="badge rounded-pill text-bg-{{ $mobileStatus === 'ASSIGNED' ? 'warning' : ($mobileProgress === 100 ? 'success' : 'primary') }}">{{ str($mobileStatus)->headline() }}</span></div>
+                        <div class="d-flex flex-wrap gap-2 small text-secondary mt-3"><span><i class="bi bi-person me-1"></i>{{ $job->customer->name }}</span><span><i class="bi bi-calendar-event me-1"></i>{{ $job->scheduled_at?->format('d M, g:i A') ?? 'Flexible schedule' }}</span></div>
+                        <div class="d-flex justify-content-between small mt-3 mb-1"><span class="text-secondary">Pipeline progress</span><strong>{{ $mobileProgress }}%</strong></div><div class="progress job-progress" role="progressbar" aria-label="{{ $job->job_number }} progress" aria-valuenow="{{ $mobileProgress }}" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar {{ $mobileProgress === 100 ? 'bg-success' : '' }}" style="width: {{ $mobileProgress }}%"></div></div>
+                        <div class="d-flex gap-2 mt-3"><a class="btn btn-primary flex-grow-1" href="{{ route('technician.jobs.show', $job) }}">{{ $mobileAction }} <i class="bi bi-arrow-right ms-1"></i></a>@if($job->customer->phone)<a class="btn btn-outline-primary" href="tel:{{ $job->customer->phone }}" aria-label="Call {{ $job->customer->name }}"><i class="bi bi-telephone"></i></a>@endif</div>
+                    </article>
+                @endforeach
+            </div>
+            <div class="table-responsive d-none d-lg-block"><table class="table table-hover align-middle w-100" data-rich-table><thead class="table-light"><tr><th>Job</th><th>Customer</th><th>Schedule</th><th>Pipeline</th><th>Next action</th><th class="text-end">Open</th></tr></thead><tbody>
                 @foreach($jobs as $job)
                     @php
                         $jobStatus = $job->status->value;
@@ -77,7 +112,8 @@
 
     <div class="card content-card mt-4" id="payout-statements"><div class="card-body p-4"><div class="d-flex justify-content-between align-items-center mb-3"><h2 class="h5 section-heading mb-0">Payout statements</h2><span class="badge rounded-pill text-bg-light">{{ $payoutLines->count() }}</span></div>
         @if($payoutLines->isNotEmpty())
-            <div class="table-responsive"><table class="table table-hover align-middle w-100" data-rich-table><thead class="table-light"><tr><th>Cycle</th><th>Period</th><th>Net payout</th><th>Status</th><th>Actions</th></tr></thead><tbody>@foreach($payoutLines as $line)<tr><td><strong>{{ $line->cycle->cycle_number }}</strong></td><td>{{ $line->cycle->starts_on->format('d M') }} – {{ $line->cycle->ends_on->format('d M Y') }}</td><td class="fw-bold">₹{{ number_format((float) $line->net_amount, 2) }}</td><td><span class="badge text-bg-light border">{{ str($line->status->value)->headline() }}</span></td><td><a class="btn btn-sm btn-outline-primary me-1 mb-1" href="{{ route('technician.payout-lines.payslip', $line) }}"><i class="bi bi-file-earmark-pdf me-1"></i>Payslip</a>@if(!$line->disputes->contains('status', 'OPEN'))<button class="btn btn-sm btn-outline-danger mb-1" type="button" data-bs-toggle="modal" data-bs-target="#dispute-{{ $line->id }}">Dispute</button>@endif</td></tr>@endforeach</tbody></table></div>
+            <div class="vstack gap-2 d-lg-none">@foreach($payoutLines as $line)<div class="utility-card rounded-4 p-3"><div class="d-flex justify-content-between align-items-start gap-2"><div><div class="small text-secondary">{{ $line->cycle->cycle_number }}</div><strong class="fs-5">₹{{ number_format((float) $line->net_amount, 2) }}</strong></div><span class="badge text-bg-light border">{{ str($line->status->value)->headline() }}</span></div><div class="small text-secondary mt-2">{{ $line->cycle->starts_on->format('d M') }} – {{ $line->cycle->ends_on->format('d M Y') }}</div><div class="d-flex gap-2 mt-3"><a class="btn btn-sm btn-outline-primary flex-grow-1" href="{{ route('technician.payout-lines.payslip', $line) }}"><i class="bi bi-file-earmark-pdf me-1"></i>Download payslip</a>@if(!$line->disputes->contains('status', 'OPEN'))<button class="btn btn-sm btn-outline-danger" type="button" data-bs-toggle="modal" data-bs-target="#dispute-{{ $line->id }}">Dispute</button>@endif</div></div>@endforeach</div>
+            <div class="table-responsive d-none d-lg-block"><table class="table table-hover align-middle w-100" data-rich-table><thead class="table-light"><tr><th>Cycle</th><th>Period</th><th>Net payout</th><th>Status</th><th>Actions</th></tr></thead><tbody>@foreach($payoutLines as $line)<tr><td><strong>{{ $line->cycle->cycle_number }}</strong></td><td>{{ $line->cycle->starts_on->format('d M') }} – {{ $line->cycle->ends_on->format('d M Y') }}</td><td class="fw-bold">₹{{ number_format((float) $line->net_amount, 2) }}</td><td><span class="badge text-bg-light border">{{ str($line->status->value)->headline() }}</span></td><td><a class="btn btn-sm btn-outline-primary me-1 mb-1" href="{{ route('technician.payout-lines.payslip', $line) }}"><i class="bi bi-file-earmark-pdf me-1"></i>Payslip</a>@if(!$line->disputes->contains('status', 'OPEN'))<button class="btn btn-sm btn-outline-danger mb-1" type="button" data-bs-toggle="modal" data-bs-target="#dispute-{{ $line->id }}">Dispute</button>@endif</td></tr>@endforeach</tbody></table></div>
             @foreach($payoutLines as $line)
                 @if(!$line->disputes->contains('status', 'OPEN'))<div class="modal fade" id="dispute-{{ $line->id }}" tabindex="-1" aria-labelledby="dispute-title-{{ $line->id }}" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><form method="POST" action="{{ route('technician.payout-lines.disputes.store', $line) }}" data-ajax>@csrf<div class="modal-header"><h3 class="h5 modal-title" id="dispute-title-{{ $line->id }}">Dispute {{ $line->cycle->cycle_number }}</h3><button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body"><label class="form-label" for="dispute-reason-{{ $line->id }}">Describe the discrepancy</label><textarea class="form-control" id="dispute-reason-{{ $line->id }}" name="reason" rows="4" required></textarea></div><div class="modal-footer"><button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Cancel</button><button class="btn btn-danger" type="submit">Submit dispute</button></div></form></div></div></div>@endif
             @endforeach
@@ -88,7 +124,30 @@
 
 @push('scripts')
 <script>
+let technicianInstallPrompt;
+window.addEventListener('beforeinstallprompt', (event) => { event.preventDefault(); technicianInstallPrompt = event; });
 document.addEventListener('DOMContentLoaded', () => {
+    const connectivity = document.querySelector('[data-connectivity]');
+    const updateConnectivity = () => {
+        connectivity.textContent = navigator.onLine ? 'Online · ready to sync' : 'Offline · actions will queue';
+        connectivity.classList.toggle('text-primary', navigator.onLine);
+        connectivity.classList.toggle('text-danger', !navigator.onLine);
+    };
+    updateConnectivity();
+    window.addEventListener('online', updateConnectivity);
+    window.addEventListener('offline', updateConnectivity);
+    document.querySelectorAll('[data-install-app]').forEach((button) => button.addEventListener('click', async () => {
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+            await window.Swal.fire({ icon: 'success', title: 'Already installed', text: 'Your field app is already on your home screen.' });
+            return;
+        }
+        if (technicianInstallPrompt) {
+            await technicianInstallPrompt.prompt();
+            technicianInstallPrompt = null;
+            return;
+        }
+        await window.Swal.fire({ icon: 'info', title: 'Install your field app', text: 'Open your browser menu and choose “Add to Home Screen”. On iPhone, tap Share, then Add to Home Screen.' });
+    }));
     const deviceId = localStorage.getItem('acserv-device-id') || (window.crypto?.randomUUID?.() ?? String(Date.now()));
     localStorage.setItem('acserv-device-id', deviceId);
     document.querySelectorAll('[data-geolocation-form]').forEach((form) => {

@@ -51,6 +51,11 @@ return [
         'public_key' => env('PUSH_PUBLIC_KEY'),
     ],
 
+    'onesignal' => [
+        'app_id' => env('ONESIGNAL_APP_ID'),
+        'api_key' => env('ONESIGNAL_REST_API_KEY'),
+    ],
+
     'razorpay' => [
         'key_id' => env('RAZORPAY_KEY_ID'),
         'key_secret' => env('RAZORPAY_KEY_SECRET'),

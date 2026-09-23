@@ -44,7 +44,7 @@ class PortalController extends Controller
             'outstandingBalance' => (float) $customer->invoices()->sum('balance_due'),
             'assets' => $customer->assets()->with('warranties')->orderBy('name')->get(),
             'bookings' => $customer->bookings()->latest()->limit(10)->get(),
-            'jobs' => $customer->jobs()->with(['asset:id,name', 'assignments.technician:id,first_name,last_name,phone', 'invoice:id,job_id,invoice_number,grand_total'])->latest()->limit(10)->get(),
+            'jobs' => $customer->jobs()->with(['asset:id,name', 'assignments.technician:id,first_name,last_name,phone', 'invoice:id,job_id,invoice_number,grand_total', 'feedback:id,job_id,rating,comment,status'])->latest()->limit(10)->get(),
             'invoices' => $customer->invoices()->latest('issued_on')->limit(10)->get(),
             'reminders' => $customer->serviceReminders()->where('status', 'PENDING')->orderBy('due_on')->get(),
             'preferences' => $request->user()->notificationPreferences()->get(),
@@ -122,6 +122,7 @@ class PortalController extends Controller
     {
         $customer = $this->customer($request);
         $job = Job::query()->where('customer_id', $customer->getKey())->findOrFail($request->validated('job_id'));
+        abort_if($job->feedback()->exists(), 422, 'Feedback for this job has already been submitted.');
         $rating = (int) $request->validated('rating');
         $feedback = Feedback::query()->create([
             ...$request->validated(),

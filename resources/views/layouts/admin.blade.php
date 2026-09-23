@@ -35,9 +35,11 @@
                     @endif
                     @if (auth()->user()->role->canManageInventory())
                         <a class="nav-link {{ request()->routeIs('admin.inventory.*') ? 'active' : '' }}" href="{{ route('admin.inventory.index') }}"><i class="bi bi-box-seam" aria-hidden="true"></i>Inventory</a>
+                        <a class="nav-link {{ request()->routeIs('admin.purchases.*', 'admin.vendors.*') ? 'active' : '' }}" href="{{ route('admin.purchases.index') }}"><i class="bi bi-bag-check" aria-hidden="true"></i>Purchases</a>
                     @endif
                     @if (auth()->user()->role->canManageBilling())
                         <a class="nav-link {{ request()->routeIs('admin.billing.*', 'admin.invoices.*', 'admin.payments.*') ? 'active' : '' }}" href="{{ route('admin.billing.index') }}"><i class="bi bi-receipt-cutoff" aria-hidden="true"></i>Billing</a>
+                        <a class="nav-link {{ request()->routeIs('admin.accounts.*', 'admin.account-entries.*') ? 'active' : '' }}" href="{{ route('admin.accounts.index') }}"><i class="bi bi-wallet2" aria-hidden="true"></i>Accounts &amp; P/L</a>
                         <a class="nav-link {{ request()->routeIs('admin.warranties.*') ? 'active' : '' }}" href="{{ route('admin.warranties.index') }}"><i class="bi bi-patch-check" aria-hidden="true"></i>Warranty</a>
                         <a class="nav-link {{ request()->routeIs('admin.analytics.*') ? 'active' : '' }}" href="{{ route('admin.analytics.index') }}"><i class="bi bi-bar-chart-line" aria-hidden="true"></i>Analytics</a>
                     @endif
@@ -47,6 +49,7 @@
                     @if (auth()->user()->role->canManageWorkforce())
                         <a class="nav-link {{ request()->routeIs('admin.workforce.*') ? 'active' : '' }}" href="{{ route('admin.workforce.index') }}"><i class="bi bi-people" aria-hidden="true"></i>Workforce</a>
                         <a class="nav-link {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}" href="{{ route('admin.notifications.index') }}"><i class="bi bi-bell" aria-hidden="true"></i>Notifications</a>
+                        <a class="nav-link {{ request()->routeIs('admin.feedback.*') ? 'active' : '' }}" href="{{ route('admin.feedback.index') }}"><i class="bi bi-chat-heart" aria-hidden="true"></i>Customer feedback</a>
                     @endif
                     @if (auth()->user()->role->canManageContent())
                         <a class="nav-link {{ request()->routeIs('admin.cms.*') ? 'active' : '' }}" href="{{ route('admin.cms.index') }}"><i class="bi bi-layout-text-window" aria-hidden="true"></i>Website CMS</a>

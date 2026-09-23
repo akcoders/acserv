@@ -81,6 +81,9 @@ class AcservInstall extends Command
         }
 
         $this->components->info('ACServ is installed. Add cron for artisan schedule:run and verify SMTP OTP delivery.');
+        if ($this->option('demo')) {
+            $this->components->info('Demo workspace includes users, jobs, inventory, vendors, purchases, accounts, and technician payroll data.');
+        }
 
         return self::SUCCESS;
     }

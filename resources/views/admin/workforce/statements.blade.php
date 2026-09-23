@@ -1,0 +1,8 @@
+<section class="card content-card mt-4" id="salary-slips">
+    <div class="card-header bg-white border-0 px-4 py-4"><p class="admin-eyebrow text-primary mb-1">Payroll register</p><h2 class="h5 mb-1">Salary slips & technician earnings</h2><div class="small text-secondary">Latest processed statements, including base pay, field earnings, incentives and deductions.</div></div>
+    <div class="table-responsive"><table class="table table-hover align-middle mb-0" data-rich-table><thead><tr><th>Employee</th><th>Period</th><th>Base pay</th><th>Incentive</th><th>Deductions</th><th>Net payout</th><th data-unsortable>Slip</th></tr></thead><tbody>
+        @forelse($payoutLines as $line)
+            <tr><td><strong>{{ $line->user?->name ?? 'Employee' }}</strong><div class="small text-secondary">{{ $line->cycle?->cycle_number }}</div></td><td>{{ $line->cycle?->starts_on?->format('d M') }} – {{ $line->cycle?->ends_on?->format('d M Y') }}</td><td>₹{{ number_format((float) $line->base_amount, 2) }}<div class="small text-secondary">{{ $line->job_count }} jobs · {{ $line->worked_hours }} h</div></td><td class="text-success fw-semibold">+ ₹{{ number_format((float) $line->incentive_amount, 2) }}</td><td class="text-danger">− ₹{{ number_format((float) $line->penalty_amount + (float) $line->deduction_amount, 2) }}</td><td class="fw-bold">₹{{ number_format((float) $line->net_amount, 2) }}</td><td><a class="btn btn-sm btn-outline-primary" href="{{ route('admin.payout-lines.payslip', [$line->cycle, $line]) }}"><i class="bi bi-file-earmark-pdf me-1"></i>PDF</a></td></tr>
+        @empty<tr><td colspan="7" class="text-center text-secondary py-5">Run a payout cycle to generate salary slips.</td></tr>@endforelse
+    </tbody></table></div>
+</section>

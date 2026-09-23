@@ -1,15 +1,20 @@
 <?php
 
+use App\Http\Controllers\Admin\AccountController;
 use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\BillingController;
 use App\Http\Controllers\Admin\BookingController;
 use App\Http\Controllers\Admin\CmsController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\EmployeeController;
+use App\Http\Controllers\Admin\FeedbackController;
 use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\JobController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\PaymentCollectionController as AdminPaymentCollectionController;
 use App\Http\Controllers\Admin\PaymentSettingsController;
+use App\Http\Controllers\Admin\PurchaseController;
+use App\Http\Controllers\Admin\QuickCustomerController;
 use App\Http\Controllers\Admin\WarrantyController;
 use App\Http\Controllers\Admin\WorkforceController;
 use App\Http\Controllers\Auth\OtpLoginController;
@@ -56,6 +61,7 @@ Route::middleware(['auth', 'tenant'])->group(function (): void {
         Route::get('/', DashboardController::class)->name('dashboard');
 
         Route::middleware('role:OWNER,ADMIN,MANAGER,DISPATCHER')->group(function (): void {
+            Route::post('/customers/quick', [QuickCustomerController::class, 'store'])->name('customers.quick.store');
             Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
             Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
             Route::put('/bookings/{booking}', [BookingController::class, 'update'])->name('bookings.update');
@@ -72,6 +78,14 @@ Route::middleware(['auth', 'tenant'])->group(function (): void {
         });
 
         Route::middleware('role:OWNER,ADMIN,MANAGER,ACCOUNTANT')->group(function (): void {
+            Route::get('/purchases', [PurchaseController::class, 'index'])->name('purchases.index');
+            Route::post('/vendors', [PurchaseController::class, 'storeVendor'])->name('vendors.store');
+            Route::put('/vendors/{vendor}', [PurchaseController::class, 'updateVendor'])->name('vendors.update');
+            Route::post('/purchases', [PurchaseController::class, 'store'])->name('purchases.store');
+            Route::get('/purchases/{purchaseOrder}', [PurchaseController::class, 'show'])->name('purchases.show');
+            Route::post('/purchases/{purchaseOrder}/receive', [PurchaseController::class, 'receive'])->name('purchases.receive');
+            Route::get('/accounts', [AccountController::class, 'index'])->name('accounts.index');
+            Route::post('/account-entries', [AccountController::class, 'store'])->name('account-entries.store');
             Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
             Route::post('/inventory', [InventoryController::class, 'store'])->name('inventory.store');
             Route::put('/inventory/{inventory}', [InventoryController::class, 'update'])->name('inventory.update');
@@ -106,6 +120,10 @@ Route::middleware(['auth', 'tenant'])->group(function (): void {
         });
 
         Route::middleware('role:OWNER,ADMIN,MANAGER')->group(function (): void {
+            Route::post('/employees', [EmployeeController::class, 'store'])->name('employees.store');
+            Route::put('/employees/{employee}', [EmployeeController::class, 'update'])->name('employees.update');
+            Route::get('/feedback', [FeedbackController::class, 'index'])->name('feedback.index');
+            Route::post('/feedback/{feedback}/review', [FeedbackController::class, 'review'])->name('feedback.review');
             Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
             Route::post('/notification-templates', [NotificationController::class, 'storeTemplate'])->name('notification-templates.store');
             Route::get('/workforce', [WorkforceController::class, 'index'])->name('workforce.index');

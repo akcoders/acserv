@@ -144,6 +144,8 @@ class OperationsDemoSeeder extends Seeder
                 'attendance_date' => today(), 'checked_in_at' => now()->startOfDay()->addHours(9),
                 'status' => 'PRESENT', 'worked_minutes' => 0,
             ]);
+
+            $this->call(CommerceDemoSeeder::class);
         } finally {
             $this->tenantContext->clear();
         }

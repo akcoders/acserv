@@ -17,73 +17,46 @@ class PdfDocument
         $invoice->loadMissing(['customer', 'lines', 'payments', 'job.asset', 'job.assignments.technician']);
         $job = $invoice->job;
         $sheet = new PdfCanvas('Tax invoice', $invoice->invoice_number);
-
-        $sheet->section('Billing information');
-        $sheet->details([
-            'Invoice number' => $invoice->invoice_number,
-            'Job reference' => $job?->job_number ?? 'Direct invoice',
-            'Customer' => $invoice->customer?->name ?? 'Customer',
-            'Contact' => trim(($invoice->customer?->phone ?? '').'  '.($invoice->customer?->email ?? '')) ?: '-',
-            'Issued on' => $invoice->issued_on?->format('d M Y') ?? '-',
-            'Due on' => $invoice->due_on?->format('d M Y') ?? '-',
-            'Invoice status' => str($invoice->status->value)->lower()->headline()->toString(),
-            'Supplier GSTIN' => $invoice->supplier_gstin ?: '-',
-        ]);
-        $sheet->note('Billing address: '.$this->address($invoice->billing_address));
-        if ($job) {
-            $sheet->note('Service: '.$job->service_type.' | Technician: '.$job->assignments->pluck('technician.name')->filter()->join(', '));
-            if ($job->asset) {
-                $sheet->note('Equipment: '.$job->asset->name.' / '.$job->asset->brand.' '.$job->asset->model.' / S/N '.$job->asset->serial_number);
-            }
-        }
-
-        $sheet->section('Itemized charges');
-        $widths = [221, 51, 72, 62, 105];
-        $sheet->tableHeader(['Service / item', 'Qty', 'Rate', 'Tax', 'Amount'], $widths);
-        foreach ($invoice->lines as $index => $line) {
-            $sheet->tableRow([
+        $lastPayment = $invoice->payments->sortByDesc('paid_at')->first();
+        $equipment = $job?->asset
+            ? trim(implode(' ', array_filter([$job->asset->name, $job->asset->brand, $job->asset->model])))
+            : '-';
+        $sheet->invoiceLayout(
+            [
+                'customer' => $invoice->customer?->name ?? 'Customer',
+                'contact' => trim(($invoice->customer?->phone ?? '').'  '.($invoice->customer?->email ?? '')) ?: '-',
+                'address' => $this->address($invoice->billing_address),
+                'issued' => $invoice->issued_on?->format('d M Y') ?? '-',
+                'due' => $invoice->due_on?->format('d M Y') ?? '-',
+                'status' => str($invoice->status->value)->lower()->headline()->toString(),
+                'job' => $job?->job_number ?? 'Direct invoice',
+                'gstin' => $invoice->supplier_gstin ?: '-',
+                'service' => $job?->service_type ?? 'Service invoice',
+                'technician' => $job?->assignments->pluck('technician.name')->filter()->join(', ') ?: '-',
+                'equipment' => $equipment,
+                'payment' => $lastPayment
+                    ? $lastPayment->mode->value.' / '.$lastPayment->payment_number.' / '.$lastPayment->paid_at?->format('d M Y')
+                    : 'No payment recorded',
+                'payment_count' => (string) $invoice->payments->count(),
+            ],
+            $invoice->lines->map(fn ($line): array => [
                 $line->description.($line->hsn_code ? ' / HSN '.$line->hsn_code : ''),
                 number_format((float) $line->quantity, 2),
-                'INR '.number_format((float) $line->unit_price, 2),
+                number_format((float) $line->unit_price, 2),
                 number_format((float) $line->tax_rate, 2).'%',
-                'INR '.number_format((float) $line->line_total, 2),
-            ], $widths, $index % 2 === 0);
-        }
-        if ($invoice->lines->isEmpty()) {
-            $sheet->tableRow(['No charge lines recorded', '-', '-', '-', '-'], $widths);
-        }
-
-        $sheet->section('Invoice summary');
-        $sheet->total('Subtotal', $this->money($invoice->subtotal));
-        $sheet->total('Discount', $this->money($invoice->discount_total));
-        $sheet->total('GST / tax', $this->money($invoice->tax_total));
-        $sheet->total('Grand total', $this->money($invoice->grand_total), true);
-        $sheet->total('Paid', $this->money($invoice->paid_total));
-        $sheet->total('Balance due', $this->money($invoice->balance_due), true);
-
-        if ($invoice->payments->isNotEmpty()) {
-            $sheet->section('Payment record');
-            $sheet->tableHeader(['Receipt', 'Method', 'Status', 'Date', 'Amount'], $widths);
-            foreach ($invoice->payments as $index => $payment) {
-                $sheet->tableRow([
-                    $payment->payment_number,
-                    $payment->mode->value,
-                    $payment->status->value,
-                    $payment->paid_at?->format('d M Y') ?? '-',
-                    $this->money($payment->amount),
-                ], $widths, $index % 2 === 0);
-            }
-        }
-
-        if ($job) {
-            $sheet->section('Customer authorization');
-            $sheet->imageCard('Signed approval before work', $this->storedImage('local', $job->prework_signature_path), 'Customer approved the inspected work before service began.', 100);
-            $sheet->imageCard('Signed completion acknowledgement', $this->storedImage('local', $job->customer_signature_path), 'Customer acknowledged the completed service.', 100);
-        }
-        if ($invoice->notes) {
-            $sheet->section('Notes');
-            $sheet->note($invoice->notes);
-        }
+                number_format((float) $line->line_total, 2),
+            ])->all(),
+            [
+                'Subtotal' => $this->money($invoice->subtotal),
+                'Discount' => $this->money($invoice->discount_total),
+                'GST / tax' => $this->money($invoice->tax_total),
+                'Grand total' => $this->money($invoice->grand_total),
+                'Paid' => $this->money($invoice->paid_total),
+                'Balance due' => $this->money($invoice->balance_due),
+            ],
+            $this->storedImage('local', $job?->customer_signature_path),
+            $invoice->notes,
+        );
 
         return $sheet->output();
     }
@@ -117,7 +90,7 @@ class PdfDocument
         $sheet->note('Inspection / fault found: '.($job->inspection_remark ?: '-'));
         $sheet->note('Completion / resolution: '.($job->completion_remark ?: $job->resolution ?: '-'));
 
-        $sheet->section('Work timeline');
+        $sheet->section('Work timeline', 60);
         $widths = [142, 178, 191];
         $sheet->tableHeader(['Stage', 'Time', 'Detail'], $widths);
         $timeline = [
@@ -137,17 +110,16 @@ class PdfDocument
             $sheet->tableRow([$row[0], $row[1]->format('d M Y h:i A'), $row[2] ?: '-'], $widths, $index % 2 === 0);
         }
 
-        $sheet->section('Checklist');
-        $checklistWidths = [385, 126];
-        $sheet->tableHeader(['Work item', 'Result'], $checklistWidths);
-        foreach ($job->checklistItems as $index => $item) {
-            $sheet->tableRow([$item->label, $item->completed_at ? 'Completed' : 'Pending'], $checklistWidths, $index % 2 === 0);
-        }
-        if ($job->checklistItems->isEmpty()) {
-            $sheet->tableRow(['No checklist items', '-'], $checklistWidths);
+        if ($job->checklistItems->isNotEmpty()) {
+            $sheet->section('Checklist', 60);
+            $checklistWidths = [385, 126];
+            $sheet->tableHeader(['Work item', 'Result'], $checklistWidths);
+            foreach ($job->checklistItems as $index => $item) {
+                $sheet->tableRow([$item->label, $item->completed_at ? 'Completed' : 'Pending'], $checklistWidths, $index % 2 === 0);
+            }
         }
 
-        $sheet->section('Parts and labor');
+        $sheet->section('Parts and labor', 60);
         $partWidths = [205, 57, 59, 82, 108];
         $sheet->tableHeader(['Material / service', 'Used', 'Back', 'Rate', 'Billable'], $partWidths);
         $sheet->tableRow([$job->service_type.' labor', '1', '-', $this->money($job->service_cost), $this->money($job->service_cost)], $partWidths);
@@ -167,36 +139,35 @@ class PdfDocument
             $sheet->total('Balance', $this->money($job->invoice->balance_due));
         }
 
+        $photoCards = [];
         if ($job->paymentCollections->isNotEmpty()) {
-            $sheet->section('On-site payment collection');
+            $sheet->section('On-site payment collection', 20);
             foreach ($job->paymentCollections as $collection) {
-                $sheet->details([
-                    'Method' => $collection->mode->value,
-                    'Amount' => $this->money($collection->amount),
-                    'Status' => $collection->status->value,
-                    'Reference' => $collection->reference ?: '-',
-                ]);
+                $sheet->note($collection->mode->value.' / '.$this->money($collection->amount).' / '.$collection->status->value.' / Ref: '.($collection->reference ?: '-'));
                 if ($collection->proof_path) {
-                    $sheet->imageCard('UPI transaction proof', $this->storedImage('local', $collection->proof_path), '', 160);
+                    $photoCards[] = ['title' => 'UPI transaction proof', 'bytes' => $this->storedImage('local', $collection->proof_path), 'caption' => 'Payment collection evidence'];
                 }
             }
         }
 
-        $sheet->section('Photo evidence');
         foreach ($job->evidence->filter(fn ($evidence): bool => $evidence->type !== EvidenceType::Signature && str_starts_with((string) $evidence->mime_type, 'image/')) as $evidence) {
-            $sheet->imageCard(
-                str($evidence->type->value)->lower()->headline().' / '.($evidence->captured_at?->format('d M Y h:i A') ?? 'Recorded'),
-                $this->storedImage($evidence->disk, $evidence->path),
-                'Uploaded by '.($evidence->uploader?->name ?? 'Technician').'. '.($evidence->metadata['remark'] ?? ''),
-                230,
-            );
+            $photoCards[] = [
+                'title' => str($evidence->type->value)->lower()->headline().' / '.($evidence->captured_at?->format('d M Y h:i A') ?? 'Recorded'),
+                'bytes' => $this->storedImage($evidence->disk, $evidence->path),
+                'caption' => 'By '.($evidence->uploader?->name ?? 'Technician').'. '.($evidence->metadata['remark'] ?? ''),
+            ];
         }
-        if ($job->evidence->isEmpty()) {
+        if ($photoCards === []) {
             $sheet->note('No photo evidence recorded.');
+        } else {
+            $sheet->section('Photo evidence', 168);
+            $sheet->mediaGrid($photoCards, 148);
         }
-        $sheet->section('Customer signatures');
-        $sheet->imageCard('Approval before work', $this->storedImage('local', $job->prework_signature_path), 'Customer authorized the diagnosis and proposed service.', 100);
-        $sheet->imageCard('Completion acknowledgement', $this->storedImage('local', $job->customer_signature_path), 'Customer acknowledged completed work and final condition.', 100);
+        $sheet->section('Customer signatures', 130);
+        $sheet->mediaGrid([
+            ['title' => 'Approval before work', 'bytes' => $this->storedImage('local', $job->prework_signature_path), 'caption' => 'Diagnosis and service authorized'],
+            ['title' => 'Completion acknowledgement', 'bytes' => $this->storedImage('local', $job->customer_signature_path), 'caption' => 'Completed work accepted'],
+        ], 112);
 
         return $sheet->output();
     }

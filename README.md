@@ -2,6 +2,8 @@
 
 ACServ is a multi-tenant air-conditioning service ERP built as one Laravel application. It provides an admin ERP, technician PWA, customer PWA, and CMS-driven public website.
 
+The ERP includes the job pipeline, customer-signed PDF invoices and job cards, booking calendar, inventory and purchase orders, vendor payments, operational accounts/P&L, employee/pay-grade and salary-slip management, attendance/leave, feedback follow-up, and OneSignal-ready push notifications.
+
 ## Technology
 
 - Laravel 13 and PHP 8.3+
@@ -87,7 +89,7 @@ php artisan acserv:install --workspace=your-tenant-slug --owner-email=you@your-d
 
 To install **demo data** instead, keep `PUBLIC_TENANT_SLUG=acserv-demo` and `DEMO_WORKSPACE=acserv-demo`. Set `DEMO_OWNER_EMAIL`, `DEMO_TECHNICIAN_EMAIL`, and `DEMO_CUSTOMER_EMAIL` to three real, distinct inboxes or working aliases, then run `php artisan acserv:install --demo --no-interaction`. The `.test` default addresses work only as local examples and cannot receive production OTP. For a `public_html` document root, add the `--web-root=...` option to either command.
 
-The installer checks configuration and compiled assets, generates `APP_KEY` only if missing, runs **pending migrations only**, creates the first workspace in a transaction, links public uploads without overwriting an existing path, and caches the application. Re-running it preserves existing tenants and business data; it never runs `migrate:fresh`. Preserve the generated `APP_KEY` in a password manager because changing it makes encrypted backups and data unreadable. If you edit `.env` after installation, run `php artisan config:clear --no-interaction` before rerunning the installer. An empty database needs `--demo` or `--workspace`/`--owner-email` on its first run.
+The installer checks configuration and compiled assets, generates `APP_KEY` only if missing, runs **pending migrations only**, creates the first workspace in a transaction, links public uploads without overwriting an existing path, and caches the application. Demo installation includes sample vendor, received purchase/stock receipt, account entries, and technician pay-grade data. Re-running it preserves existing tenants and business data; it never runs `migrate:fresh`. Preserve the generated `APP_KEY` in a password manager because changing it makes encrypted backups and data unreadable. If you edit `.env` after installation, run `php artisan config:clear --no-interaction` before rerunning the installer. An empty database needs `--demo` or `--workspace`/`--owner-email` on its first run.
 
 6. Ensure `storage/` and `bootstrap/cache/` are writable by the PHP process. Keep `storage/app/private`, logs, backups, evidence, and the root `.env` outside the public web root. The `--web-root` option expects a copied Laravel `index.php` in that directory and creates only its missing `storage` symlink. If Hostinger disables symlinks, use `--no-storage-link` and serve public uploads through a supported protected route or enable symlinks before relying on QR images and uploads.
 7. Add one Hostinger cron job every minute, replacing the PHP binary and application path with values shown in hPanel:
@@ -98,7 +100,9 @@ The installer checks configuration and compiled assets, generates `APP_KEY` only
 
 The scheduler runs reminders, scorecards, scheduled reports, encrypted backups, and a bounded database queue worker using `--stop-when-empty`. No persistent worker is required.
 
-8. Configure any enabled SMS, WhatsApp, push, and Razorpay credentials in `.env`. Log in as owner, open Admin → Billing, and upload the real workspace UPI QR before using UPI collection; cash collection works without a QR. HTTPS is required for geolocation, camera capture, PWA installation, and push notifications. Test an OTP for the real owner inbox before handing over the site.
+8. Configure any enabled SMS, WhatsApp, OneSignal push, and Razorpay credentials in `.env`. Log in as owner, open Admin → Billing, and upload the real workspace UPI QR before using UPI collection; cash collection works without a QR. HTTPS is required for geolocation, camera capture, PWA installation, and push notifications. Test an OTP for the real owner inbox before handing over the site.
+
+For OneSignal, create a Web Push app whose site URL exactly matches `APP_URL`'s HTTPS origin. Set `ONESIGNAL_APP_ID` and `ONESIGNAL_REST_API_KEY` in server `.env`, then run `php artisan config:cache --no-interaction`. Ensure `https://your-domain.example/onesignal/OneSignalSDKWorker.js` serves JavaScript; if using `public_html`, copy the `public/onesignal` directory there too. The OneSignal worker uses `/onesignal/` scope and coexists with the main PWA `/sw.js`. Keep OneSignal Identity Verification disabled for the current web SDK. Technician/customer users enable notifications from the bell in their portals; Admin → Notifications shows integration status and delivery logs. [OneSignal's worker setup](https://documentation.onesignal.com/docs/en/onesignal-service-worker) and [message API](https://documentation.onesignal.com/reference/create-message) document the required setup.
 
 ## Production checks
 
@@ -134,8 +138,11 @@ The restore command is intentionally a merge/upsert operation. A full replacemen
 Provider configuration is optional in local development. Production variables are documented in `.env.example`:
 
 - SMTP through Laravel mail
-- Generic bearer-token SMS, WhatsApp, and web-push provider endpoints
+- Generic bearer-token SMS, WhatsApp, and legacy web-push provider endpoints
+- OneSignal Web SDK v16 and REST API for targeted technician/customer push
 - VAPID-compatible public push key for browser subscription
 - Razorpay order creation and signed webhook settlement
 
 Queued notification delivery retries three times with backoff and records masked delivery logs.
+
+Accounts → P&L is an operational accrual statement, not a double-entry general ledger or GST return. It counts invoiced sales, net parts used on jobs, operating expenses, and generated payroll; buying inventory is not immediately expensed.

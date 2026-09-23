@@ -56,6 +56,11 @@ class Job extends TenantModel
         return $this->hasOne(Invoice::class);
     }
 
+    public function feedback(): HasOne
+    {
+        return $this->hasOne(Feedback::class);
+    }
+
     public function paymentCollections(): HasMany
     {
         return $this->hasMany(JobPaymentCollection::class);

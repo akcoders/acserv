@@ -89,11 +89,19 @@ class NotificationDispatcher
         return match ($channel) {
             NotificationChannel::Email => $user->email,
             NotificationChannel::Sms, NotificationChannel::WhatsApp => $user->phone,
-            NotificationChannel::Push => $user->pushSubscriptions()
-                ->whereNull('revoked_at')
-                ->latest('last_used_at')
-                ->first()?->endpoint,
+            NotificationChannel::Push => $this->hasOneSignalCredentials()
+                ? (string) $user->getKey()
+                : $user->pushSubscriptions()
+                    ->whereNull('revoked_at')
+                    ->latest('last_used_at')
+                    ->first()?->endpoint,
         };
+    }
+
+    private function hasOneSignalCredentials(): bool
+    {
+        return filled(config('services.onesignal.app_id'))
+            && filled(config('services.onesignal.api_key'));
     }
 
     private function mask(string $destination): string

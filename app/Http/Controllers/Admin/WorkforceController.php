@@ -4,14 +4,18 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\LeaveStatus;
 use App\Enums\PayoutStatus;
+use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePayoutCycleRequest;
 use App\Models\AttendanceRecord;
+use App\Models\Branch;
 use App\Models\LeaveBalance;
 use App\Models\LeaveRequest;
 use App\Models\PayoutCycle;
 use App\Models\PayoutDispute;
+use App\Models\PayoutLine;
 use App\Models\TechnicianScorecard;
+use App\Models\User;
 use App\Services\Billing\PdfDocument;
 use App\Services\Notifications\NotificationDispatcher;
 use App\Services\Workforce\PayoutService;
@@ -26,10 +30,19 @@ class WorkforceController extends Controller
 {
     public function index(): View
     {
+        $tenantId = request()->user()->tenant_id;
+
         return view('admin.workforce.index', [
+            'employees' => User::query()->forTenant($tenantId)
+                ->whereIn('role', [Role::Admin, Role::Manager, Role::Dispatcher, Role::Technician, Role::Accountant])
+                ->with(['employmentProfile.manager', 'technicianProfile.branch'])
+                ->orderBy('first_name')->get(),
+            'managers' => User::query()->forTenant($tenantId)->whereIn('role', [Role::Owner, Role::Admin, Role::Manager])->orderBy('first_name')->get(),
+            'branches' => Branch::query()->where('is_active', true)->orderBy('name')->get(),
             'attendance' => AttendanceRecord::query()->with('user:id,first_name,last_name')->orderByDesc('attendance_date')->limit(50)->get(),
             'leaveRequests' => LeaveRequest::query()->with('user:id,first_name,last_name')->orderByDesc('created_at')->limit(50)->get(),
             'payoutCycles' => PayoutCycle::query()->withCount('lines')->orderByDesc('starts_on')->limit(20)->get(),
+            'payoutLines' => PayoutLine::query()->with(['user:id,first_name,last_name', 'cycle:id,cycle_number,starts_on,ends_on'])->latest()->limit(100)->get(),
             'scorecards' => TechnicianScorecard::query()->with('user:id,first_name,last_name')->orderByDesc('period_ends_on')->orderByDesc('score')->limit(20)->get(),
             'payoutDisputes' => PayoutDispute::query()->with(['user:id,first_name,last_name', 'payoutLine.cycle'])->where('status', 'OPEN')->latest()->get(),
         ]);
@@ -80,15 +93,21 @@ class WorkforceController extends Controller
 
     public function payslip(PayoutCycle $payoutCycle, string $line, PdfDocument $pdf): Response
     {
-        $payoutLine = $payoutCycle->lines()->with('user')->findOrFail($line);
+        $payoutLine = $payoutCycle->lines()->with('user.employmentProfile')->findOrFail($line);
+        $profile = $payoutLine->user->employmentProfile;
 
         return response($pdf->make('ACServ Payslip', [
             'Cycle: '.$payoutCycle->cycle_number,
             'Employee: '.$payoutLine->user->name,
+            'Employee code: '.($profile?->employee_code ?? '-'),
+            'Designation / grade: '.($profile?->designation ?? '-').' / '.($profile?->pay_grade ?? '-'),
             'Period: '.$payoutCycle->starts_on->format('d M Y').' - '.$payoutCycle->ends_on->format('d M Y'),
             'Completed jobs: '.$payoutLine->job_count,
             'Worked hours: '.$payoutLine->worked_hours,
-            'Base amount: INR '.$payoutLine->base_amount,
+            'Salary component: INR '.number_format((float) ($payoutLine->details['salary_amount'] ?? 0), 2),
+            'Job earnings: INR '.number_format((float) ($payoutLine->details['job_amount'] ?? 0), 2),
+            'Hourly earnings: INR '.number_format((float) ($payoutLine->details['hour_amount'] ?? 0), 2),
+            'Base earnings: INR '.$payoutLine->base_amount,
             'Incentive: INR '.$payoutLine->incentive_amount,
             'Penalty: INR '.$payoutLine->penalty_amount,
             'Deductions: INR '.$payoutLine->deduction_amount,

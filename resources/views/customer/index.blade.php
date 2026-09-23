@@ -3,33 +3,63 @@
 @section('title', 'Customer — '.__('app.name'))
 @section('dashboard-url', route('customer.dashboard'))
 
+@push('head')
+<style>
+    .customer-home { max-width: 1320px; margin-inline: auto; }
+    .customer-home .customer-hero { position: relative; overflow: hidden; background: linear-gradient(125deg, #09213c 4%, #0b4e79 58%, #137f9e); border: 0; color: #fff; }
+    .customer-home .customer-hero::before, .customer-home .customer-hero::after { content: ''; position: absolute; border: 1px solid rgba(255,255,255,.13); border-radius: 50%; pointer-events: none; }
+    .customer-home .customer-hero::before { width: 22rem; height: 22rem; right: -5rem; top: -12rem; box-shadow: 0 0 0 4rem rgba(255,255,255,.035); }
+    .customer-home .customer-hero::after { width: 17rem; height: 17rem; right: 10%; bottom: -13rem; }
+    .customer-home .hero-content { position: relative; z-index: 1; }
+    .customer-home .hero-kicker { color: #8ce8f5; letter-spacing: .13em; }
+    .customer-home .hero-description { max-width: 37rem; color: rgba(255,255,255,.76); }
+    .customer-home .hero-visual { position: relative; display: grid; place-items: center; min-height: 10rem; }
+    .customer-home .hero-visual i { font-size: 6rem; line-height: 1; color: #b9f7ff; filter: drop-shadow(0 14px 22px rgba(1,19,37,.24)); }
+    .customer-home .hero-visual span { position: absolute; bottom: -.2rem; right: 8%; padding: .45rem .85rem; border: 1px solid rgba(255,255,255,.25); border-radius: 999px; background: rgba(255,255,255,.14); font-size: .75rem; font-weight: 700; backdrop-filter: blur(6px); }
+    .customer-home .metric-card { border: 1px solid #e0eaf4; box-shadow: 0 10px 28px rgba(17,54,92,.045); }
+    .customer-home .metric-icon { display: grid; place-items: center; width: 3.2rem; height: 3.2rem; flex: 0 0 auto; border-radius: 1rem; font-size: 1.4rem; }
+    .customer-home .section-kicker { font-size: .7rem; text-transform: uppercase; letter-spacing: .13em; font-weight: 800; color: #087f9b; }
+    .customer-home .service-card { border: 1px solid #dce8f4; box-shadow: 0 7px 20px rgba(18,49,85,.035); transition: transform .18s ease, box-shadow .18s ease; }
+    .customer-home .service-card:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(18,49,85,.09); }
+    .customer-home .service-card .progress { background: #e9eff6; }
+    .customer-home .service-card .progress-bar { background: linear-gradient(90deg, #087fc6, #18b9ad); }
+    .customer-home .feedback-panel { background: #f3f8fe; border: 1px solid #dceaf8; }
+    .customer-home .quick-link { display: flex; align-items: center; gap: .85rem; padding: .85rem 1rem; color: #19334f; text-decoration: none; border: 1px solid #dce8f4; border-radius: 1rem; background: #fff; transition: border-color .18s ease, transform .18s ease; }
+    .customer-home .quick-link:hover { color: #075c91; border-color: #71c5ea; transform: translateY(-1px); }
+    .customer-home .quick-link .quick-icon { display: grid; place-items: center; width: 2.4rem; height: 2.4rem; flex: 0 0 auto; border-radius: .8rem; background: #eaf6fc; color: #087da4; font-size: 1.1rem; }
+    .customer-home .equipment-card { border: 1px solid #e0eaf4; background: linear-gradient(120deg, #fff, #f8fbff); }
+    @media (max-width: 575.98px) { .customer-home .customer-hero .card-body { padding: 1.5rem !important; } .customer-home .metric-card .card-body { padding: .9rem !important; } .customer-home .metric-icon { width: 2.6rem; height: 2.6rem; font-size: 1.1rem; } .customer-home .metric-value { font-size: 1.25rem !important; } }
+</style>
+@endpush
+
 @section('content')
-    <div class="rounded-4 bg-dark text-white p-4 p-lg-5 mb-4 shadow-sm">
+<div class="customer-home">
+    <div class="card customer-hero rounded-4 mb-4 shadow-sm"><div class="card-body p-4 p-lg-5 hero-content">
         <div class="row align-items-center g-4">
             <div class="col-lg-8">
-                <div class="small text-uppercase fw-semibold text-info mb-2">Your service workspace</div>
-                <h1 class="h2 fw-bold mb-2">Welcome back, {{ $customer->name }}</h1>
-                <p class="text-white-50 mb-4">Book a visit, follow every stage of the repair, and pay your bill in one place.</p>
+                <div class="hero-kicker small text-uppercase fw-bold mb-2">Your comfort, in control</div>
+                <h1 class="display-6 fw-bold mb-2">Hello, {{ $customer->name }}</h1>
+                <p class="hero-description mb-4">Everything for your AC care in one place. Book a visit, follow the technician’s progress and keep every bill close at hand.</p>
                 <div class="d-flex flex-wrap gap-2">
-                    <button class="btn btn-info fw-semibold" data-bs-toggle="modal" data-bs-target="#bookingModal"><i class="bi bi-calendar-plus me-2"></i>Book a service</button>
-                    <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#assetModal"><i class="bi bi-plus-circle me-2"></i>Add an AC unit</button>
+                    <button class="btn btn-info fw-semibold px-3" data-bs-toggle="modal" data-bs-target="#bookingModal"><i class="bi bi-calendar-plus me-2"></i>Book a service</button>
+                    <button class="btn btn-outline-light px-3" data-bs-toggle="modal" data-bs-target="#assetModal"><i class="bi bi-plus-circle me-2"></i>Add an AC unit</button>
                 </div>
             </div>
-            <div class="col-lg-4 d-none d-lg-block text-center"><i class="bi bi-snow2 display-1 text-info" aria-hidden="true"></i></div>
+            <div class="col-lg-4 d-none d-lg-block"><div class="hero-visual"><i class="bi bi-snow2" aria-hidden="true"></i><span><i class="bi bi-shield-check me-1" style="font-size: .75rem"></i>Service you can follow</span></div></div>
         </div>
-    </div>
+    </div></div>
 
     <div class="row g-3 mb-4">
-        <div class="col-6 col-lg-4"><div class="card content-card h-100"><div class="card-body d-flex align-items-center gap-3"><span class="rounded-3 bg-primary-subtle text-primary p-3"><i class="bi bi-snow fs-4"></i></span><div><div class="h3 fw-bold mb-0">{{ $assets->count() }}</div><div class="small text-secondary">AC units</div></div></div></div></div>
-        <div class="col-6 col-lg-4"><div class="card content-card h-100"><div class="card-body d-flex align-items-center gap-3"><span class="rounded-3 bg-warning-subtle text-warning-emphasis p-3"><i class="bi bi-tools fs-4"></i></span><div><div class="h3 fw-bold mb-0">{{ $activeJobCount }}</div><div class="small text-secondary">Active jobs</div></div></div></div></div>
-        <div class="col-12 col-lg-4"><div class="card content-card h-100"><div class="card-body d-flex align-items-center gap-3"><span class="rounded-3 bg-success-subtle text-success p-3"><i class="bi bi-receipt fs-4"></i></span><div><div class="h3 fw-bold mb-0">₹{{ number_format($outstandingBalance, 2) }}</div><div class="small text-secondary">Balance due</div></div></div></div></div>
+        <div class="col-6 col-lg-4"><div class="card content-card metric-card h-100"><div class="card-body d-flex align-items-center gap-3"><span class="metric-icon bg-primary-subtle text-primary"><i class="bi bi-snow"></i></span><div><div class="h3 metric-value fw-bold mb-0">{{ $assets->count() }}</div><div class="small text-secondary">AC units</div></div></div></div></div>
+        <div class="col-6 col-lg-4"><div class="card content-card metric-card h-100"><div class="card-body d-flex align-items-center gap-3"><span class="metric-icon bg-warning-subtle text-warning-emphasis"><i class="bi bi-tools"></i></span><div><div class="h3 metric-value fw-bold mb-0">{{ $activeJobCount }}</div><div class="small text-secondary">Active jobs</div></div></div></div></div>
+        <div class="col-12 col-lg-4"><div class="card content-card metric-card h-100"><div class="card-body d-flex align-items-center gap-3"><span class="metric-icon bg-success-subtle text-success"><i class="bi bi-receipt"></i></span><div><div class="h3 metric-value fw-bold mb-0">₹{{ number_format($outstandingBalance, 2) }}</div><div class="small text-secondary">Balance due</div></div></div></div></div>
     </div>
 
     <div class="row g-4 align-items-start">
         <div class="col-xl-7">
             <section class="card content-card mb-4" id="service-pipeline">
                 <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
-                    <div><div class="small text-uppercase fw-semibold text-primary">Live updates</div><h2 class="h5 fw-bold mb-0">Service pipeline</h2></div>
+                    <div><div class="section-kicker mb-1">Live updates</div><h2 class="h5 fw-bold mb-0">Service pipeline</h2><p class="small text-secondary mb-0 mt-1">Know exactly where every visit stands.</p></div>
                     <span class="badge text-bg-primary rounded-pill">{{ $jobs->count() }} recent</span>
                 </div>
                 <div class="card-body px-4 pb-4 vstack gap-3">
@@ -40,7 +70,7 @@
                             $progress = in_array($job->status->value, ['VERIFIED', 'CLOSED'], true) ? 100 : ($stageIndex === false ? 0 : (int) round($stageIndex / (count($pipeline) - 1) * 100));
                             $isFinished = in_array($job->status, [\App\Enums\JobStatus::Completed, \App\Enums\JobStatus::Verified, \App\Enums\JobStatus::Closed], true);
                         @endphp
-                        <article class="border rounded-4 p-3 p-sm-4" data-track-url="{{ route('customer.jobs.tracking', $job) }}" data-status="{{ $job->status->value }}">
+                        <article class="service-card rounded-4 p-3 p-sm-4" data-track-url="{{ route('customer.jobs.tracking', $job) }}" data-status="{{ $job->status->value }}">
                             <div class="d-flex align-items-start justify-content-between gap-3">
                                 <div><div class="small text-secondary mb-1">{{ $job->job_number }} · {{ $job->asset?->name ?? 'Service visit' }}</div><h3 class="h6 fw-bold mb-0">{{ $job->service_type }}</h3></div>
                                 <span class="badge rounded-pill {{ $isFinished ? 'text-bg-success' : ($job->status === \App\Enums\JobStatus::Cancelled ? 'text-bg-secondary' : 'text-bg-primary') }} job-status">{{ str($job->status->value)->lower()->headline() }}</span>
@@ -59,13 +89,18 @@
                             @if($job->invoice)
                                 <div class="alert alert-success py-2 mt-3 mb-0 small d-flex justify-content-between align-items-center gap-2"><span><i class="bi bi-receipt me-1"></i>Bill {{ $job->invoice->invoice_number }} · ₹{{ number_format((float) $job->invoice->grand_total, 2) }}</span><a href="{{ route('customer.invoices.pdf', $job->invoice) }}" class="alert-link text-nowrap">View bill</a></div>
                             @endif
-                            @if($isFinished)
-                                <form class="row g-2 mt-3" method="POST" action="{{ route('customer.feedback.store') }}" data-ajax>
+                            @if($isFinished && $job->feedback)
+                                <div class="feedback-panel rounded-4 p-3 mt-3"><div class="d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill text-success"></i><strong class="small">Thanks for sharing your feedback</strong><span class="ms-auto text-warning" aria-label="{{ $job->feedback->rating }} out of 5 stars">{{ str_repeat('★', (int) $job->feedback->rating) }}</span></div>@if($job->feedback->comment)<p class="small text-secondary mt-2 mb-0">“{{ $job->feedback->comment }}”</p>@endif</div>
+                            @elseif($isFinished)
+                                <form class="feedback-panel rounded-4 p-3 mt-3" method="POST" action="{{ route('customer.feedback.store') }}" data-ajax>
                                     @csrf
                                     <input type="hidden" name="job_id" value="{{ $job->id }}">
-                                    <div class="col-sm-4"><select class="form-select" name="rating" aria-label="Service rating">@for($rating=5;$rating>=1;$rating--)<option value="{{ $rating }}">{{ $rating }} star</option>@endfor</select></div>
-                                    <div class="col-sm-8"><input class="form-control" name="comment" placeholder="How was the service?"></div>
-                                    <div class="col-12"><button class="btn btn-sm btn-outline-primary w-100">Submit feedback</button></div>
+                                    <div class="d-flex align-items-center gap-2 mb-2"><i class="bi bi-chat-heart text-primary"></i><strong class="small">How did we do?</strong></div>
+                                    <div class="row g-2">
+                                        <div class="col-sm-5"><label class="visually-hidden" for="rating-{{ $job->id }}">Service rating</label><select class="form-select form-select-sm" id="rating-{{ $job->id }}" name="rating" required>@for($rating=5;$rating>=1;$rating--)<option value="{{ $rating }}">{{ str_repeat('★', $rating) }} {{ $rating }} / 5</option>@endfor</select></div>
+                                        <div class="col-sm-7"><label class="visually-hidden" for="feedback-{{ $job->id }}">Your feedback</label><input class="form-control form-control-sm" id="feedback-{{ $job->id }}" name="comment" placeholder="Tell us what went well"></div>
+                                        <div class="col-12"><button class="btn btn-sm btn-primary w-100" type="submit"><i class="bi bi-send me-1"></i>Send feedback</button></div>
+                                    </div>
                                 </form>
                             @endif
                         </article>
@@ -77,10 +112,29 @@
         </div>
         <div class="col-xl-5">
             <section class="card content-card mb-4">
-                <div class="card-header bg-white border-0 pt-4 px-4"><div class="small text-uppercase fw-semibold text-primary">Equipment</div><h2 class="h5 fw-bold mb-0">Your AC units</h2></div>
+                <div class="card-body p-4">
+                    <div class="section-kicker mb-1">Shortcuts</div><h2 class="h5 fw-bold mb-3">What would you like to do?</h2>
+                    <div class="vstack gap-2">
+                        <button class="quick-link text-start w-100" type="button" data-bs-toggle="modal" data-bs-target="#bookingModal"><span class="quick-icon"><i class="bi bi-calendar-plus"></i></span><span class="flex-grow-1"><strong class="d-block">Schedule a visit</strong><small class="text-secondary">Choose a time that works for you</small></span><i class="bi bi-chevron-right text-secondary"></i></button>
+                        <a class="quick-link" href="#invoices"><span class="quick-icon"><i class="bi bi-receipt"></i></span><span class="flex-grow-1"><strong class="d-block">View your bills</strong><small class="text-secondary">Invoices and payment details</small></span><i class="bi bi-chevron-right text-secondary"></i></a>
+                        <button class="quick-link text-start w-100" type="button" data-install-app><span class="quick-icon"><i class="bi bi-phone"></i></span><span class="flex-grow-1"><strong class="d-block">Add this app to your phone</strong><small class="text-secondary">Get one-tap access to your services</small></span><i class="bi bi-chevron-right text-secondary"></i></button>
+                    </div>
+                </div>
+            </section>
+            @if($bookings->isNotEmpty())
+                <section class="card content-card mb-4">
+                    <div class="card-body p-4"><div class="section-kicker mb-1">Your requests</div><h2 class="h5 fw-bold mb-3">Recent bookings</h2><div class="vstack gap-2">
+                        @foreach($bookings->take(3) as $booking)
+                            <div class="d-flex align-items-center justify-content-between gap-3 border-bottom pb-2"><div class="min-w-0"><strong class="d-block text-truncate">{{ $booking->service_type }}</strong><small class="text-secondary">{{ $booking->preferred_start_at?->format('d M Y, g:i A') ?? 'Time to be confirmed' }}</small></div><span class="badge rounded-pill text-bg-light border">{{ str($booking->status->value)->headline() }}</span></div>
+                        @endforeach
+                    </div></div>
+                </section>
+            @endif
+            <section class="card content-card mb-4">
+                <div class="card-header bg-white border-0 pt-4 px-4"><div class="section-kicker">Equipment</div><h2 class="h5 fw-bold mb-0">Your AC units</h2></div>
                 <div class="card-body px-4 pb-4 vstack gap-3">
                     @forelse($assets as $asset)
-                        <div class="border rounded-4 p-3"><div class="d-flex justify-content-between align-items-start gap-2"><div><strong>{{ $asset->name }}</strong><div class="small text-secondary mt-1">{{ $asset->brand }} {{ $asset->model }} @if($asset->capacity)· {{ $asset->capacity }}@endif</div></div><span class="rounded-3 bg-primary-subtle text-primary px-2 py-1"><i class="bi bi-snow"></i></span></div>@foreach($asset->warranties as $warranty)<a class="small d-block mt-2" href="{{ route('customer.warranties.certificate', $warranty) }}"><i class="bi bi-patch-check me-1"></i>Warranty until {{ $warranty->ends_on->format('d M Y') }}</a>@endforeach</div>
+                        <div class="equipment-card rounded-4 p-3"><div class="d-flex justify-content-between align-items-start gap-2"><div><strong>{{ $asset->name }}</strong><div class="small text-secondary mt-1">{{ $asset->brand }} {{ $asset->model }} @if($asset->capacity)· {{ $asset->capacity }}@endif</div></div><span class="rounded-3 bg-primary-subtle text-primary px-2 py-1"><i class="bi bi-snow"></i></span></div>@foreach($asset->warranties as $warranty)<a class="small d-block mt-2" href="{{ route('customer.warranties.certificate', $warranty) }}"><i class="bi bi-patch-check me-1"></i>Warranty until {{ $warranty->ends_on->format('d M Y') }}</a>@endforeach</div>
                     @empty
                         <p class="text-secondary mb-0">Add your first AC unit to keep its service history together.</p>
                     @endforelse
@@ -93,7 +147,7 @@
     </div>
 
     <section class="card content-card mb-4" id="invoices">
-        <div class="card-header bg-white border-0 pt-4 px-4"><div class="small text-uppercase fw-semibold text-primary">Payments</div><h2 class="h5 fw-bold mb-0">Recent invoices</h2></div>
+        <div class="card-header bg-white border-0 pt-4 px-4"><div class="section-kicker">Payments</div><h2 class="h5 fw-bold mb-0">Recent invoices</h2></div>
         <div class="card-body px-4 pb-4"><div class="table-responsive"><table class="table table-hover align-middle mb-0" data-rich-table><thead><tr><th>Invoice</th><th>Issued</th><th>Status</th><th>Total</th><th>Due</th><th class="text-end">Actions</th></tr></thead><tbody>
             @forelse($invoices as $invoice)
                 <tr><td class="fw-semibold">{{ $invoice->invoice_number }}</td><td>{{ $invoice->issued_on?->format('d M Y') }}</td><td><span class="badge {{ (float) $invoice->balance_due > 0 ? 'text-bg-warning' : 'text-bg-success' }}">{{ str($invoice->status->value)->headline() }}</span></td><td>₹{{ number_format((float) $invoice->grand_total, 2) }}</td><td>₹{{ number_format((float) $invoice->balance_due, 2) }}</td><td class="text-end"><div class="btn-group btn-group-sm"><a class="btn btn-outline-primary" href="{{ route('customer.invoices.pdf', $invoice) }}">PDF</a>@if((float) $invoice->balance_due > 0)<button class="btn btn-primary" data-online-payment data-url="{{ route('customer.invoices.gateway-order', $invoice) }}" data-amount="{{ $invoice->balance_due }}">Pay now</button>@endif</div></td></tr>
@@ -102,15 +156,30 @@
             @endforelse
         </tbody></table></div></div>
     </section>
-    <div class="card content-card"><div class="card-body"><h2 class="h5">Notification preferences</h2><form method="POST" action="{{ route('customer.notification-preferences.store') }}" data-ajax>@csrf<div class="row g-2"><div class="col-md-4"><select class="form-select" name="channel">@foreach(\App\Enums\NotificationChannel::cases() as $channel)<option value="{{ $channel->value }}">{{ $channel->value }}</option>@endforeach</select></div><div class="col-md-4"><input class="form-control" type="time" name="quiet_starts_at" title="Quiet hours start"></div><div class="col-md-4"><input class="form-control" type="time" name="quiet_ends_at" title="Quiet hours end"></div><input type="hidden" name="event" value="*"><input type="hidden" name="is_enabled" value="1"><input type="hidden" name="timezone" value="Asia/Kolkata"><div class="col-12"><button class="btn btn-outline-primary w-100">Save preference</button></div></div></form></div></div>
+    <section class="card content-card mb-4"><div class="card-body p-4"><div class="d-flex align-items-start gap-3 mb-3"><span class="metric-icon bg-primary-subtle text-primary"><i class="bi bi-bell"></i></span><div><div class="section-kicker mb-1">Stay informed</div><h2 class="h5 fw-bold mb-1">Notification preferences</h2><p class="small text-secondary mb-0">Choose a channel and quiet hours for service updates.</p></div></div><form method="POST" action="{{ route('customer.notification-preferences.store') }}" data-ajax>@csrf<div class="row g-3"><div class="col-md-4"><label class="form-label small fw-semibold" for="notification-channel">Channel</label><select class="form-select" id="notification-channel" name="channel">@foreach(\App\Enums\NotificationChannel::cases() as $channel)<option value="{{ $channel->value }}">{{ str($channel->value)->headline() }}</option>@endforeach</select></div><div class="col-md-4"><label class="form-label small fw-semibold" for="quiet-start">Quiet hours start</label><input class="form-control" id="quiet-start" type="time" name="quiet_starts_at"></div><div class="col-md-4"><label class="form-label small fw-semibold" for="quiet-end">Quiet hours end</label><input class="form-control" id="quiet-end" type="time" name="quiet_ends_at"></div><input type="hidden" name="event" value="*"><input type="hidden" name="is_enabled" value="1"><input type="hidden" name="timezone" value="Asia/Kolkata"><div class="col-12"><button class="btn btn-outline-primary" type="submit">Save preference</button></div></div></form>@if($preferences->isNotEmpty())<div class="border-top mt-3 pt-3 small text-secondary">Saved channels: @foreach($preferences as $preference)<span class="badge text-bg-light border me-1">{{ str($preference->channel->value)->headline() }}</span>@endforeach</div>@endif</div></section>
 
     <div class="modal fade" id="bookingModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><form method="POST" action="{{ route('customer.bookings.store') }}" data-ajax data-offline-queue>@csrf<div class="modal-header"><h2 class="h5 modal-title">Book AC service</h2><button class="btn-close" type="button" data-bs-dismiss="modal"></button></div><div class="modal-body vstack gap-3"><div><label class="form-label">AC unit</label><select class="form-select" name="asset_id"><option value="">General service</option>@foreach($assets as $asset)<option value="{{ $asset->id }}">{{ $asset->name }} — {{ $asset->brand }}</option>@endforeach</select></div><div><label class="form-label">Service type</label><select class="form-select" name="service_type"><option>AC servicing</option><option>Repair</option><option>Installation</option><option>Uninstallation</option><option>Inspection</option></select></div><div><label class="form-label">Preferred time</label><input class="form-control" type="datetime-local" name="preferred_start_at" required></div><div><label class="form-label">Problem</label><textarea class="form-control" name="complaint" rows="3"></textarea></div></div><div class="modal-footer"><button class="btn btn-primary">Submit booking</button></div></form></div></div></div>
     <div class="modal fade" id="assetModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><form method="POST" action="{{ route('customer.assets.store') }}" data-ajax>@csrf<div class="modal-header"><h2 class="h5 modal-title">Add AC unit</h2><button class="btn-close" type="button" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="row g-3"><div class="col-12"><label class="form-label">Display name</label><input class="form-control" name="name" placeholder="Living room AC" required></div><div class="col-6"><label class="form-label">Brand</label><input class="form-control" name="brand" required></div><div class="col-6"><label class="form-label">Model</label><input class="form-control" name="model"></div><div class="col-6"><label class="form-label">Serial number</label><input class="form-control" name="serial_number"></div><div class="col-6"><label class="form-label">Capacity</label><input class="form-control" name="capacity" placeholder="1.5 ton"></div><div class="col-12"><label class="form-label">Installation date</label><input class="form-control" type="date" name="install_date"></div></div></div><div class="modal-footer"><button class="btn btn-primary">Add asset</button></div></form></div></div></div>
+</div>
 @endsection
 
 @push('scripts')
 <script>
+let customerInstallPrompt;
+window.addEventListener('beforeinstallprompt', (event) => { event.preventDefault(); customerInstallPrompt = event; });
 document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-install-app]').forEach((button) => button.addEventListener('click', async () => {
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+            await window.Swal.fire({ icon: 'success', title: 'Already installed', text: 'ACServ is already on your home screen.' });
+            return;
+        }
+        if (customerInstallPrompt) {
+            await customerInstallPrompt.prompt();
+            customerInstallPrompt = null;
+            return;
+        }
+        await window.Swal.fire({ icon: 'info', title: 'Add ACServ to your phone', text: 'Open your browser menu and choose “Add to Home Screen”. On iPhone, tap Share, then Add to Home Screen.' });
+    }));
     const loadRazorpay = () => new Promise((resolve, reject) => {
         if (window.Razorpay) return resolve();
         const script = document.createElement('script');
@@ -158,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
             card.querySelector('.job-progress-bar').style.width = `${progress}%`;
             card.querySelector('.job-progress-label').textContent = `${progress}%`;
             card.querySelector('.progress').setAttribute('aria-valuenow', progress);
-            if (previousStatus !== job.status && (job.invoice_number || ['AWAITING_PAYMENT', 'PAYMENT_PENDING'].includes(job.status))) window.location.reload();
+            if (previousStatus !== job.status) window.location.reload();
         } catch {}
     });
     window.setInterval(refreshTracking, 30000);

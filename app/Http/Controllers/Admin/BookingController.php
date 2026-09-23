@@ -8,6 +8,7 @@ use App\Http\Requests\StoreBookingRequest;
 use App\Models\Booking;
 use App\Models\Branch;
 use App\Models\Customer;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -15,8 +16,29 @@ use Illuminate\View\View;
 
 class BookingController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request): View|JsonResponse
     {
+        $month = $request->filled('calendar_month')
+            ? $request->validate(['calendar_month' => ['required', 'date_format:Y-m']])['calendar_month']
+            : now()->format('Y-m');
+        $monthStart = CarbonImmutable::createFromFormat('!Y-m', $month)->startOfMonth();
+
+        $calendarCounts = Booking::query()
+            ->where('preferred_start_at', '>=', $monthStart)
+            ->where('preferred_start_at', '<', $monthStart->addMonth())
+            ->where('status', '!=', BookingStatus::Cancelled)
+            ->selectRaw('DATE(preferred_start_at) as booking_date, COUNT(*) as booking_count')
+            ->groupByRaw('DATE(preferred_start_at)')
+            ->get()
+            ->mapWithKeys(fn (Booking $booking): array => [
+                $booking->booking_date => (int) $booking->booking_count,
+            ])
+            ->all();
+
+        if ($request->filled('calendar_month')) {
+            return response()->json(['month' => $month, 'counts' => $calendarCounts]);
+        }
+
         $bookings = Booking::query()
             ->with(['customer:id,name,phone', 'asset:id,name,brand,model', 'branch:id,name'])
             ->when($request->filled('status'), fn ($query) => $query->where('status', $request->string('status')))
@@ -37,6 +59,8 @@ class BookingController extends Controller
             'customers' => Customer::query()->orderBy('name')->get(['id', 'name', 'phone']),
             'branches' => Branch::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
             'statuses' => BookingStatus::cases(),
+            'calendarMonth' => $month,
+            'calendarCounts' => $calendarCounts,
         ]);
     }
 
