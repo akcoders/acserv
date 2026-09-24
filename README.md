@@ -51,7 +51,7 @@ With `MAIL_MAILER=log` locally, request an email OTP; the code is shown on the l
 
 ## Hostinger shared-hosting installation
 
-The full, step-by-step guide is [SERVER_INSTALLATION.md](SERVER_INSTALLATION.md). It covers the one-time browser installer, secure access token, demo-data option, command-line fallback, updates, and troubleshooting.
+The full, step-by-step guide is [SERVER_INSTALLATION.md](SERVER_INSTALLATION.md). It covers the one-time browser installer, secure access token, demo-data option, command-line fallback, ZIP updates, and troubleshooting. An installed site does **not** need reinstalling for a new release: deploy the updater once, then use Admin → Application updates with a validated ZIP and a full MySQL backup.
 
 In brief: select PHP 8.3+ and MySQL in Hostinger, enable HTTPS and SMTP, then keep the Laravel application **outside** `public_html`. Copy only the contents of `public/` into `public_html`. In the copied `index.php`, adjust **all three** paths for `storage/framework/maintenance.php`, `vendor/autoload.php`, and `bootstrap/app.php` to the private application directory. For a non-sibling layout, also set `$customApplicationPath` in the copied `install.php`. The web installer at `/install.php` is intended for the initial setup; follow the guide's token and removal steps. It sends a synchronous SMTP test before creating database tables; SMTP acceptance does not guarantee inbox delivery. Do not expose `.env`, `vendor/`, or `storage/` as the web root.
 

@@ -85,7 +85,7 @@
                             <a class="btn btn-sm btn-outline-primary" href="{{ route('admin.jobs.index') }}">View board <i class="bi bi-arrow-up-right ms-1" aria-hidden="true"></i></a>
                         @endif
                     </div>
-                    @php($totalJobs = max(1, array_sum($statusCounts)))
+                    @php($totalJobs = max(1, collect($pipelineStatuses)->sum(fn ($status) => $statusCounts[$status->value] ?? 0)))
                     <div class="pipeline-overview mb-4" role="img" aria-label="Distribution of jobs across pipeline stages">
                         @foreach ($pipelineStatuses as $status)
                             @if (($statusCounts[$status->value] ?? 0) > 0)

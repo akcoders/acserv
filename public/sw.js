@@ -1,8 +1,13 @@
-const assetCache = 'acserv-assets-v1';
+const assetCache = 'acserv-assets-v2';
 const privateCache = 'acserv-private-v1';
 
 self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
+self.addEventListener('activate', (event) => event.waitUntil(Promise.all([
+    self.clients.claim(),
+    caches.keys().then((keys) => Promise.all(keys
+        .filter((key) => key.startsWith('acserv-assets-') && key !== assetCache)
+        .map((key) => caches.delete(key)))),
+])));
 
 self.addEventListener('message', (event) => {
     if (event.data?.type === 'CLEAR_PRIVATE') {
@@ -14,8 +19,8 @@ self.addEventListener('push', (event) => {
     const payload = event.data?.json() ?? {};
     event.waitUntil(self.registration.showNotification(payload.title ?? 'ACServ', {
         body: payload.body ?? 'You have a new service update.',
-        icon: '/favicon.ico',
-        badge: '/favicon.ico',
+        icon: '/icons/icon-192.png',
+        badge: '/icons/icon-192.png',
         data: { url: payload.url ?? '/' },
     }));
 });
@@ -33,7 +38,7 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    if (['style', 'script', 'font', 'image'].includes(request.destination)) {
+    if (url.pathname.startsWith('/build/') || url.pathname.startsWith('/icons/')) {
         event.respondWith(caches.open(assetCache).then(async (cache) => {
             const cached = await cache.match(request);
 
@@ -42,7 +47,9 @@ self.addEventListener('fetch', (event) => {
             }
 
             const response = await fetch(request);
-            cache.put(request, response.clone());
+            if (response.ok) {
+                await cache.put(request, response.clone());
+            }
 
             return response;
         }));

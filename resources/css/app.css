@@ -27,14 +27,17 @@ body {
 }
 
 .mobile-app-body {
-    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
-    background: #f2f6fb;
+    padding-bottom: calc(6.5rem + env(safe-area-inset-bottom));
+    background:
+        radial-gradient(circle at 88% 1%, rgba(84, 188, 230, 0.12), transparent 24rem),
+        linear-gradient(180deg, #eef6fb 0, #f5f8fc 24rem, #f8fafe 100%);
+    color: #17314c;
 }
 
 .mobile-app-header {
-    background: rgba(255, 255, 255, 0.96);
-    border-bottom: 1px solid #e4eaf3;
-    box-shadow: 0 0.25rem 1.5rem rgba(20, 43, 76, 0.055);
+    background: rgba(255, 255, 255, 0.94);
+    border-bottom: 1px solid rgba(188, 211, 229, 0.65);
+    box-shadow: 0 0.5rem 1.75rem rgba(20, 43, 76, 0.045);
     backdrop-filter: blur(16px);
 }
 
@@ -44,8 +47,9 @@ body {
 
 .mobile-app-header .navbar-brand {
     color: #0b2342;
-    font-size: 1.05rem;
+    font-size: 1.02rem;
     line-height: 1.15;
+    letter-spacing: -0.025em;
 }
 
 .mobile-app-header .navbar-brand small {
@@ -57,13 +61,14 @@ body {
 
 .mobile-brand-mark {
     display: inline-grid;
-    width: 2.55rem;
-    height: 2.55rem;
+    width: 2.65rem;
+    height: 2.65rem;
     place-items: center;
-    border-radius: 0.75rem;
-    background: #e7f1ff;
-    color: #0d6efd;
+    border-radius: 0.85rem;
+    background: linear-gradient(145deg, #067ab1, #1356ac);
+    color: #fff;
     font-size: 1.35rem;
+    box-shadow: 0 0.4rem 0.9rem rgba(19, 86, 172, 0.2);
 }
 
 .mobile-user-chip {
@@ -78,23 +83,77 @@ body {
     white-space: nowrap;
 }
 
+.mobile-user-avatar {
+    display: inline-grid;
+    flex: 0 0 1.7rem;
+    width: 1.7rem;
+    height: 1.7rem;
+    place-items: center;
+    border-radius: 50%;
+    background: #d8eaff;
+    color: #0c62a6;
+    font-weight: 800;
+}
+
+.mobile-header-action {
+    display: grid;
+    width: 2.65rem;
+    height: 2.65rem;
+    place-items: center;
+    border: 1px solid #d9e5f1;
+    border-radius: 0.85rem;
+    background: #f7faff;
+    color: #335572;
+    font-size: 1.1rem;
+}
+
+.mobile-header-action:hover,
+.mobile-header-action:focus-visible {
+    border-color: #7eb4de;
+    background: #e6f3ff;
+    color: #105b9d;
+}
+
 .mobile-app-main {
     max-width: 1440px;
+}
+
+.mobile-app-body .content-card {
+    border-color: #dfebf4;
+    border-radius: 1.2rem;
+    box-shadow: 0 0.7rem 2rem rgba(24, 60, 95, 0.055);
+}
+
+.mobile-app-body .btn {
+    font-weight: 650;
+}
+
+.mobile-app-body .btn-primary {
+    background: #1368c3;
+    border-color: #1368c3;
+}
+
+.mobile-app-body .btn-primary:hover,
+.mobile-app-body .btn-primary:focus-visible {
+    background: #0d529d;
+    border-color: #0d529d;
 }
 
 .mobile-bottom-nav {
     position: fixed;
     z-index: 1040;
-    right: 0;
-    bottom: 0;
-    left: 0;
+    right: 0.8rem;
+    bottom: calc(0.7rem + env(safe-area-inset-bottom));
+    left: 0.8rem;
     display: flex;
     align-items: stretch;
     justify-content: space-around;
-    padding: 0.45rem 0.65rem calc(0.45rem + env(safe-area-inset-bottom));
-    border-top: 1px solid #dfe7f0;
-    background: rgba(255, 255, 255, 0.98);
-    box-shadow: 0 -0.5rem 1.5rem rgba(15, 32, 58, 0.07);
+    padding: 0.4rem;
+    border: 1px solid #dce9f3;
+    border-radius: 1.35rem;
+    background: rgba(255, 255, 255, 0.97);
+    box-shadow: 0 0.6rem 2rem rgba(15, 48, 82, 0.16);
+    backdrop-filter: blur(18px);
 }
 
 .mobile-bottom-nav a {
@@ -102,9 +161,9 @@ body {
     min-width: 4.5rem;
     flex-direction: column;
     align-items: center;
-    gap: 0.15rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.75rem;
+    gap: 0.1rem;
+    padding: 0.36rem 0.5rem;
+    border-radius: 1rem;
     color: #50647a;
     font-size: 0.7rem;
     font-weight: 600;
@@ -112,13 +171,57 @@ body {
 }
 
 .mobile-bottom-nav a:hover,
-.mobile-bottom-nav a:focus-visible {
-    background: #e9f3ff;
-    color: #0d6efd;
+.mobile-bottom-nav a:focus-visible,
+.mobile-bottom-nav a.is-current {
+    background: #e8f3fc;
+    color: #0b65af;
 }
 
 .mobile-bottom-nav i {
-    font-size: 1.25rem;
+    font-size: 1.2rem;
+}
+
+.mobile-bottom-nav a.is-current i {
+    transform: translateY(-1px);
+}
+
+.mobile-install-sheet {
+    height: auto !important;
+    max-height: 80vh;
+    border: 0;
+    border-radius: 1.5rem 1.5rem 0 0;
+    box-shadow: 0 -1rem 3rem rgba(7, 36, 66, 0.19);
+}
+
+.mobile-install-sheet .offcanvas-header,
+.mobile-install-sheet .offcanvas-body {
+    max-width: 34rem;
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+}
+
+.mobile-install-sheet .offcanvas-body {
+    padding-bottom: calc(1.3rem + env(safe-area-inset-bottom));
+}
+
+.mobile-install-icon {
+    display: grid;
+    flex: 0 0 2.8rem;
+    width: 2.8rem;
+    height: 2.8rem;
+    place-items: center;
+    border-radius: 0.9rem;
+    background: #e7f5fc;
+    color: #0b79af;
+    font-size: 1.4rem;
+}
+
+.mobile-install-steps {
+    padding-left: 1.3rem;
+    margin-bottom: 0.7rem;
+    color: #26415d;
+    line-height: 1.75;
 }
 
 .mobile-app-body [id] {
@@ -128,6 +231,35 @@ body {
 @media (min-width: 768px) {
     .mobile-app-body {
         padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .mobile-app-main {
+        padding-top: 2.25rem !important;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .mobile-app-main {
+        padding-inline: 1rem !important;
+        padding-top: 1.15rem !important;
+    }
+
+    .mobile-app-body .content-card .card-body {
+        padding: 1.2rem !important;
+    }
+
+    .mobile-app-body .content-card .card-header {
+        padding-inline: 1.2rem !important;
+    }
+
+    .mobile-app-body .btn-lg {
+        min-height: 3.1rem;
+        font-size: 1rem;
+    }
+
+    .mobile-app-body .form-control,
+    .mobile-app-body .form-select {
+        min-height: 2.8rem;
     }
 }
 
@@ -425,6 +557,8 @@ body {
 .admin-body [data-status="INSPECTED"] { --stage-color: #a17bdb; --stage-tint: #f2eafd; }
 .admin-body [data-status="AUTHORIZED"] { --stage-color: #9b70c8; --stage-tint: #f2eafd; }
 .admin-body [data-status="IN_PROGRESS"] { --stage-color: #ea9b2d; --stage-tint: #fff3de; }
+.admin-body [data-status="AWAITING_PAYMENT"] { --stage-color: #d18a39; --stage-tint: #fff2df; }
+.admin-body [data-status="PAYMENT_PENDING"] { --stage-color: #bd7737; --stage-tint: #fff0e4; }
 .admin-body [data-status="COMPLETED"] { --stage-color: #29a273; --stage-tint: #e5f7ed; }
 .admin-body [data-status="VERIFIED"] { --stage-color: #208b6c; --stage-tint: #e1f4ed; }
 .admin-body [data-status="CLOSED"] { --stage-color: #536f81; --stage-tint: #e9f0f3; }

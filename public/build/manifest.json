@@ -50,8 +50,17 @@
     "file": "assets/bootstrap-icons-mSm7cUeB.woff2",
     "src": "node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff2"
   },
+  "resources/css/public-site.css": {
+    "file": "assets/public-site-TwbjO64L.css",
+    "name": "public-site",
+    "names": [
+      "public-site.css"
+    ],
+    "src": "resources/css/public-site.css",
+    "isEntry": true
+  },
   "resources/js/app.js": {
-    "file": "assets/app-f_y-zAbX.js",
+    "file": "assets/app-D_4zeCku.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -59,7 +68,7 @@
       "_sweetalert2.all-DU56UiTv.js"
     ],
     "css": [
-      "assets/app-D0Fni7Z2.css"
+      "assets/app-Clguq0lI.css"
     ]
   },
   "resources/js/installer.js": {

@@ -157,7 +157,7 @@ In **Websites → Dashboard → Cron Jobs**, create one **Custom** job. Set sche
 
 Replace `/usr/bin/php` with the actual PHP 8.3+ CLI path (`command -v php`) and the application path with your real absolute path. First test the same command over SSH. Do **not** paste `* * * * *` into the hPanel command field; it belongs in the schedule fields. Keep the command free of `>> /dev/null 2>&1` in hPanel; Hostinger documents that redirection/special characters require a separate shell script. You can inspect output in the Cron Jobs panel. Hostinger states cron schedules use UTC, so account for that when checking time-specific tasks. See [Hostinger cron setup](https://www.hostinger.com/support/1583465-how-to-set-up-a-cron-job-at-hostinger/) and [special-character limitation](https://www.hostinger.com/support/5646919-how-to-set-up-a-cron-job-with-special-characters-at-hostinger/).
 
-This one scheduler entry runs reminders, scorecards, reports, backups, and a short-lived database queue worker. No persistent worker, Supervisor, Redis, or Node process is required.
+This one scheduler entry runs reminders, scorecards, reports, backups, application updates, and a short-lived database queue worker. No persistent worker, Supervisor, Redis, or Node process is required.
 
 ## 6. Finish application setup and verify
 
@@ -167,28 +167,38 @@ This one scheduler entry runs reminders, scorecards, reports, backups, and a sho
 4. In Admin → Billing, upload your actual UPI QR before technicians collect UPI payments. Cash collection does not require a QR.
 5. Optional OneSignal push: create its Web Push app for the same HTTPS origin as `APP_URL`; set `ONESIGNAL_APP_ID` and `ONESIGNAL_REST_API_KEY` in `.env`, then run `php artisan config:clear --no-interaction` and `php artisan config:cache --no-interaction`. The OneSignal worker file above must be reachable. Other SMS, WhatsApp, and Razorpay credentials can be configured later if those features are used.
 
-If you edit `.env` after installation, clear its old cache with `php artisan config:clear --no-interaction`, then rerun `php artisan acserv:install --workspace=my-workspace --owner-email=owner@example.com --web-root=/absolute/path/to/public_html --no-interaction` (or the matching demo command). Existing workspace data is preserved and caches are rebuilt. Keep `APP_DEBUG=false` on the live site.
+If you edit `.env` after installation, clear and rebuild its cache with `php artisan config:clear --no-interaction` and `php artisan config:cache --no-interaction`. Do not rerun the first-install flow for routine configuration changes. Keep `APP_DEBUG=false` on the live site.
 
 ## 7. Updating an existing installation
 
-Back up MySQL, uploaded files, `.env`, and the **unchanged** `APP_KEY` before updating. The installer's deletion of tracked `public/install.php` can appear as a local change in `git status`; check for any **other** uncommitted code changes before pulling. If an update changes that same installer file and Git refuses to pull, prepare a clean release directory instead of discarding unrelated local changes. The normal update sequence is:
+**Do not reinstall.** Keep the existing MySQL database, private `.env` and `APP_KEY`, and uploaded files. Back up the **entire** MySQL database with a tested restore path, plus the application and uploaded files, before every release. The tenant-scoped Analytics backup alone is not a full disaster-recovery backup for an application migration. A code rollback cannot reverse every database migration.
+
+### Browser ZIP updater
+
+The updater must first be deployed once using the manual Git/files procedure below. Thereafter, the designated public-workspace owner can open **Admin → Application updates**. The update key is created privately at `storage/app/private/system-updates/access-token`; read it through SSH/File Manager, keep it secret, and never put it in the release ZIP or a screenshot. This extra key is required even after owner OTP login because an application update changes code for every workspace.
+
+On a build machine, prepare a directory containing only changed application files in their repository-relative locations. Include compiled `public/build/` assets when frontend code changes; include compatible `vendor/` files and Composer metadata when dependencies change. Do not include `.env`, `storage/`, `bootstrap/cache/`, `public/index.php`, `public/.htaccess`, `public/install.php`, `public/storage`, or user uploads. Package the directory with:
 
 ```bash
-php artisan down
-git pull --ff-only
-composer2 install --no-dev --optimize-autoloader --no-interaction
-composer2 check-platform-reqs --no-dev
+php artisan acserv:update:package /absolute/path/to/prepared-release 2026.09.24 /absolute/path/to/acserv-update.zip
 ```
 
-Copy changed files from the new `acserv/public/` to `public_html/` (including hidden `.htaccess` and compiled `build/` assets), **excluding `install.php` and without replacing `public_html/storage`**. A later `git pull` may restore the tracked `acserv/public/install.php`; remove that exact file again and never republish it to `public_html`. For browser installs, the private installation lock also prevents reuse if a copy slips through. If you re-copy `index.php`, reapply the three private-app paths shown in step 2. Then:
+The command creates `update.json` with SHA-256 hashes. Use `--remove=relative/allowed/path` for each obsolete application file that the release must delete; never target protected files or uploads. Upload that ZIP in Admin → Application updates, enter the private key, and inspect the staged version/file count. After verifying the full backup, enter its reference, confirm downtime, and queue the update. The one-minute Hostinger scheduler takes the site into maintenance, backs up replaced code, copies verified files, runs **pending migrations only**, rebuilds caches, and brings the site back online. Reload the updater page to check status. If a migration fails or the runner stops during an update, maintenance remains enabled: inspect logs and restore the **full MySQL backup** with application files before using `php artisan up`. Never run `migrate:fresh` or re-seed demo data on an existing site.
+
+For a copied `public_html` layout, the updater normally detects the active web root from the request. If it cannot, set `ACSERV_WEB_ROOT=/absolute/path/to/public_html` in the private `.env`, then rebuild the config cache. Do not point this variable at the private Laravel root.
+
+### Manual Git/files fallback
+
+Use this for the first updater deployment or if the browser updater is unavailable. If hPanel Git auto-deploy still targets `public_html`, **disable or repoint it to the private application directory before pushing**; otherwise a Git push can expose `.env` and application code under the web root. Check `git status` and preserve all local changes, including a deleted tracked installer. During a planned maintenance window, update the private application, run `composer2 install --no-dev --optimize-autoloader --no-interaction` if dependencies changed, and copy changed public assets into the real web root. Never republish `install.php`, overwrite the live `index.php`'s three private paths, or overwrite `public_html/storage`. Then run:
 
 ```bash
-php artisan config:clear --no-interaction
-php artisan acserv:install --workspace=my-workspace --owner-email=owner@example.com --web-root=/home/u12345678/domains/example.com/public_html --no-interaction
-php artisan up
+php artisan migrate --force --no-interaction
+php artisan optimize:clear --no-interaction
+php artisan optimize --no-interaction
+php artisan up --no-interaction
 ```
 
-Use `--demo` instead of the workspace flags if that is how this database was initially created. If the installer fails, inspect its error and `storage/logs/laravel.log` before bringing the site back up. Restore the database/files from your backup if an update must be rolled back; code rollback alone may not reverse a migration.
+If the command fails, inspect `storage/logs/laravel.log` before bringing the site back up; restore from the full backup when migrations or files are inconsistent.
 
 ## Quick troubleshooting
 

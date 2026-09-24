@@ -7,6 +7,7 @@ import { bindAjaxActions, bindAjaxForms, confirmAjaxAction } from './ajax';
 import { bindRichTables } from './admin-tables';
 import { syncOfflineActions } from './offline';
 import { bindPushSubscription } from './push';
+import { bindPwaInstall } from './pwa-install';
 import '../css/app.css';
 
 window.bootstrap = bootstrap;
@@ -37,6 +38,7 @@ $(() => {
     bindAjaxActions();
     bindRichTables();
     bindPushSubscription();
+    bindPwaInstall();
 
     if ('serviceWorker' in navigator) {
         void navigator.serviceWorker.register('/sw.js');

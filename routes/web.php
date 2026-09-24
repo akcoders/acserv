@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\PaymentCollectionController as AdminPaymentCollec
 use App\Http\Controllers\Admin\PaymentSettingsController;
 use App\Http\Controllers\Admin\PurchaseController;
 use App\Http\Controllers\Admin\QuickCustomerController;
+use App\Http\Controllers\Admin\SystemUpdateController;
 use App\Http\Controllers\Admin\WarrantyController;
 use App\Http\Controllers\Admin\WorkforceController;
 use App\Http\Controllers\Auth\OtpLoginController;
@@ -59,6 +60,13 @@ Route::middleware(['auth', 'tenant'])->group(function (): void {
 
     Route::prefix('admin')->name('admin.')->middleware('role:OWNER,ADMIN,MANAGER,DISPATCHER,ACCOUNTANT')->group(function (): void {
         Route::get('/', DashboardController::class)->name('dashboard');
+
+        Route::middleware('role:OWNER')->group(function (): void {
+            Route::get('/system-updates', [SystemUpdateController::class, 'index'])->name('system-updates.index');
+            Route::post('/system-updates', [SystemUpdateController::class, 'store'])->middleware('throttle:5,1')->name('system-updates.store');
+            Route::post('/system-updates/{id}/apply', [SystemUpdateController::class, 'apply'])->middleware('throttle:3,1')->name('system-updates.apply');
+            Route::get('/system-updates/{id}/status', [SystemUpdateController::class, 'status'])->name('system-updates.status');
+        });
 
         Route::middleware('role:OWNER,ADMIN,MANAGER,DISPATCHER')->group(function (): void {
             Route::post('/customers/quick', [QuickCustomerController::class, 'store'])->name('customers.quick.store');

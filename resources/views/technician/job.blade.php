@@ -43,14 +43,14 @@
 
 @push('head')
 <style>
-    .technician-job .job-hero { background: linear-gradient(135deg, #082a53 0%, #126ac7 100%); color: #fff; }
+    .technician-job .job-hero { background: radial-gradient(circle at 95% 12%, rgba(119, 231, 242, .25), transparent 20rem), linear-gradient(135deg, #082a53 0%, #126ac7 100%); color: #fff; box-shadow: 0 1rem 2.2rem rgba(8, 65, 121, .13); }
     .technician-job .job-hero .text-soft { color: rgba(255, 255, 255, .77); }
-    .technician-job .job-stage-track { display: flex; gap: .45rem; overflow-x: auto; padding: .15rem .1rem .6rem; scrollbar-width: thin; }
-    .technician-job .job-stage { min-width: 6.35rem; flex: 1 0 6.35rem; border: 1px solid #dce5f0; border-radius: .85rem; background: #fff; padding: .65rem .45rem; text-align: center; color: #7d8c9e; font-size: .76rem; font-weight: 650; }
+    .technician-job .job-stage-track { display: flex; gap: .45rem; overflow-x: auto; padding: .15rem .1rem .6rem; scrollbar-width: thin; scroll-snap-type: x proximity; }
+    .technician-job .job-stage { min-width: 6.35rem; flex: 1 0 6.35rem; border: 1px solid #dce5f0; border-radius: .85rem; background: #fff; padding: .65rem .45rem; text-align: center; color: #7d8c9e; font-size: .76rem; font-weight: 650; scroll-snap-align: center; }
     .technician-job .job-stage i { display: block; font-size: 1.35rem; margin-bottom: .2rem; }
     .technician-job .job-stage.is-done { color: #0b815b; border-color: #c5e9d9; background: #f0fbf5; }
     .technician-job .job-stage.is-current { color: #0b61b7; border-color: #92c4f6; background: #ebf5ff; box-shadow: inset 0 0 0 1px #92c4f6; }
-    .technician-job .next-step-card { border: 1px solid #b8d7f8; box-shadow: 0 .8rem 2.4rem rgba(19, 103, 200, .12); }
+    .technician-job .next-step-card { border: 1px solid #b8d7f8; border-top: 4px solid #1684c5; box-shadow: 0 .8rem 2.4rem rgba(19, 103, 200, .12); }
     .technician-job .step-number { width: 2.25rem; height: 2.25rem; display: inline-grid; place-items: center; border-radius: .75rem; color: #fff; background: #0d6efd; flex: 0 0 auto; }
     .technician-job .photo-input { border: 2px dashed #b7cbe1; border-radius: .85rem; padding: 1rem; background: #f7fbff; }
     .technician-job .photo-preview { display: none; width: 100%; max-height: 13rem; object-fit: cover; border-radius: .75rem; margin-top: .75rem; }
@@ -217,6 +217,9 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    const stageTrack = document.querySelector('.job-stage-track');
+    const currentStage = stageTrack?.querySelector('.is-current');
+    if (currentStage) stageTrack.scrollLeft = currentStage.offsetLeft - stageTrack.offsetLeft - (stageTrack.clientWidth - currentStage.clientWidth) / 2;
     document.querySelectorAll('[data-collection-form]').forEach((form) => {
         const mode = form.querySelector('[data-payment-mode]');
         const details = form.querySelector('[data-upi-details]');

@@ -6,17 +6,19 @@
 @push('head')
 <style>
     .customer-home { max-width: 1320px; margin-inline: auto; }
-    .customer-home .customer-hero { position: relative; overflow: hidden; background: linear-gradient(125deg, #09213c 4%, #0b4e79 58%, #137f9e); border: 0; color: #fff; }
+    .customer-home .customer-hero { position: relative; overflow: hidden; background: radial-gradient(circle at 88% 15%, rgba(111, 229, 236, .25), transparent 19rem), linear-gradient(125deg, #09213c 4%, #0b4e79 58%, #137f9e); border: 0; color: #fff; box-shadow: 0 1.25rem 2.75rem rgba(9, 50, 88, .17) !important; }
     .customer-home .customer-hero::before, .customer-home .customer-hero::after { content: ''; position: absolute; border: 1px solid rgba(255,255,255,.13); border-radius: 50%; pointer-events: none; }
     .customer-home .customer-hero::before { width: 22rem; height: 22rem; right: -5rem; top: -12rem; box-shadow: 0 0 0 4rem rgba(255,255,255,.035); }
     .customer-home .customer-hero::after { width: 17rem; height: 17rem; right: 10%; bottom: -13rem; }
     .customer-home .hero-content { position: relative; z-index: 1; }
     .customer-home .hero-kicker { color: #8ce8f5; letter-spacing: .13em; }
     .customer-home .hero-description { max-width: 37rem; color: rgba(255,255,255,.76); }
+    .customer-home .customer-hero h1 { letter-spacing: -.045em; line-height: 1.1; }
     .customer-home .hero-visual { position: relative; display: grid; place-items: center; min-height: 10rem; }
     .customer-home .hero-visual i { font-size: 6rem; line-height: 1; color: #b9f7ff; filter: drop-shadow(0 14px 22px rgba(1,19,37,.24)); }
     .customer-home .hero-visual span { position: absolute; bottom: -.2rem; right: 8%; padding: .45rem .85rem; border: 1px solid rgba(255,255,255,.25); border-radius: 999px; background: rgba(255,255,255,.14); font-size: .75rem; font-weight: 700; backdrop-filter: blur(6px); }
     .customer-home .metric-card { border: 1px solid #e0eaf4; box-shadow: 0 10px 28px rgba(17,54,92,.045); }
+    .customer-home .metric-card:nth-of-type(1) { background: linear-gradient(125deg, #fff, #f6fbff); }
     .customer-home .metric-icon { display: grid; place-items: center; width: 3.2rem; height: 3.2rem; flex: 0 0 auto; border-radius: 1rem; font-size: 1.4rem; }
     .customer-home .section-kicker { font-size: .7rem; text-transform: uppercase; letter-spacing: .13em; font-weight: 800; color: #087f9b; }
     .customer-home .service-card { border: 1px solid #dce8f4; box-shadow: 0 7px 20px rgba(18,49,85,.035); transition: transform .18s ease, box-shadow .18s ease; }
@@ -28,7 +30,8 @@
     .customer-home .quick-link:hover { color: #075c91; border-color: #71c5ea; transform: translateY(-1px); }
     .customer-home .quick-link .quick-icon { display: grid; place-items: center; width: 2.4rem; height: 2.4rem; flex: 0 0 auto; border-radius: .8rem; background: #eaf6fc; color: #087da4; font-size: 1.1rem; }
     .customer-home .equipment-card { border: 1px solid #e0eaf4; background: linear-gradient(120deg, #fff, #f8fbff); }
-    @media (max-width: 575.98px) { .customer-home .customer-hero .card-body { padding: 1.5rem !important; } .customer-home .metric-card .card-body { padding: .9rem !important; } .customer-home .metric-icon { width: 2.6rem; height: 2.6rem; font-size: 1.1rem; } .customer-home .metric-value { font-size: 1.25rem !important; } }
+    .customer-home .invoice-mobile-card { border: 1px solid #dce9f4; border-radius: 1rem; background: linear-gradient(125deg, #fff, #f8fbff); padding: 1rem; }
+    @media (max-width: 575.98px) { .customer-home .customer-hero .card-body { padding: 1.5rem !important; } .customer-home .customer-hero h1 { font-size: 2rem; } .customer-home .metric-card .card-body { padding: .9rem !important; } .customer-home .metric-icon { width: 2.6rem; height: 2.6rem; font-size: 1.1rem; } .customer-home .metric-value { font-size: 1.25rem !important; } .customer-home .service-card { padding: 1rem !important; } }
 </style>
 @endpush
 
@@ -148,7 +151,19 @@
 
     <section class="card content-card mb-4" id="invoices">
         <div class="card-header bg-white border-0 pt-4 px-4"><div class="section-kicker">Payments</div><h2 class="h5 fw-bold mb-0">Recent invoices</h2></div>
-        <div class="card-body px-4 pb-4"><div class="table-responsive"><table class="table table-hover align-middle mb-0" data-rich-table><thead><tr><th>Invoice</th><th>Issued</th><th>Status</th><th>Total</th><th>Due</th><th class="text-end">Actions</th></tr></thead><tbody>
+        <div class="card-body px-4 pb-4">
+            <div class="vstack gap-3 d-md-none">
+                @forelse($invoices as $invoice)
+                    <article class="invoice-mobile-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2"><div><div class="small text-secondary">{{ $invoice->issued_on?->format('d M Y') ?? 'Invoice' }}</div><strong>{{ $invoice->invoice_number }}</strong></div><span class="badge {{ (float) $invoice->balance_due > 0 ? 'text-bg-warning' : 'text-bg-success' }}">{{ str($invoice->status->value)->headline() }}</span></div>
+                        <div class="d-flex justify-content-between align-items-end border-top mt-3 pt-3"><div><div class="small text-secondary">Total</div><strong class="fs-5">₹{{ number_format((float) $invoice->grand_total, 2) }}</strong></div><div class="text-end"><div class="small text-secondary">Balance due</div><strong class="{{ (float) $invoice->balance_due > 0 ? 'text-danger' : 'text-success' }}">₹{{ number_format((float) $invoice->balance_due, 2) }}</strong></div></div>
+                        <div class="d-flex gap-2 mt-3"><a class="btn btn-outline-primary flex-grow-1" href="{{ route('customer.invoices.pdf', $invoice) }}"><i class="bi bi-file-earmark-pdf me-1"></i>View PDF</a>@if((float) $invoice->balance_due > 0)<button class="btn btn-primary flex-grow-1" data-online-payment data-url="{{ route('customer.invoices.gateway-order', $invoice) }}" data-amount="{{ $invoice->balance_due }}">Pay now</button>@endif</div>
+                    </article>
+                @empty
+                    <div class="text-center text-secondary py-4">No invoices yet.</div>
+                @endforelse
+            </div>
+            <div class="table-responsive d-none d-md-block"><table class="table table-hover align-middle mb-0" data-rich-table><thead><tr><th>Invoice</th><th>Issued</th><th>Status</th><th>Total</th><th>Due</th><th class="text-end">Actions</th></tr></thead><tbody>
             @forelse($invoices as $invoice)
                 <tr><td class="fw-semibold">{{ $invoice->invoice_number }}</td><td>{{ $invoice->issued_on?->format('d M Y') }}</td><td><span class="badge {{ (float) $invoice->balance_due > 0 ? 'text-bg-warning' : 'text-bg-success' }}">{{ str($invoice->status->value)->headline() }}</span></td><td>₹{{ number_format((float) $invoice->grand_total, 2) }}</td><td>₹{{ number_format((float) $invoice->balance_due, 2) }}</td><td class="text-end"><div class="btn-group btn-group-sm"><a class="btn btn-outline-primary" href="{{ route('customer.invoices.pdf', $invoice) }}">PDF</a>@if((float) $invoice->balance_due > 0)<button class="btn btn-primary" data-online-payment data-url="{{ route('customer.invoices.gateway-order', $invoice) }}" data-amount="{{ $invoice->balance_due }}">Pay now</button>@endif</div></td></tr>
             @empty
@@ -165,21 +180,7 @@
 
 @push('scripts')
 <script>
-let customerInstallPrompt;
-window.addEventListener('beforeinstallprompt', (event) => { event.preventDefault(); customerInstallPrompt = event; });
 document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('[data-install-app]').forEach((button) => button.addEventListener('click', async () => {
-        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
-            await window.Swal.fire({ icon: 'success', title: 'Already installed', text: 'ACServ is already on your home screen.' });
-            return;
-        }
-        if (customerInstallPrompt) {
-            await customerInstallPrompt.prompt();
-            customerInstallPrompt = null;
-            return;
-        }
-        await window.Swal.fire({ icon: 'info', title: 'Add ACServ to your phone', text: 'Open your browser menu and choose “Add to Home Screen”. On iPhone, tap Share, then Add to Home Screen.' });
-    }));
     const loadRazorpay = () => new Promise((resolve, reject) => {
         if (window.Razorpay) return resolve();
         const script = document.createElement('script');

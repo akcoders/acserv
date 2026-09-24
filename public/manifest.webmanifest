@@ -1,11 +1,15 @@
 {
     "name": "ACServ Field Service",
     "short_name": "ACServ",
+    "description": "Service visits, job updates, invoices, and field work in one place.",
+    "id": "/",
     "start_url": "/login",
+    "scope": "/",
     "display": "standalone",
-    "background_color": "#071525",
-    "theme_color": "#0d6efd",
+    "background_color": "#0b2342",
+    "theme_color": "#0b2342",
     "icons": [
-        { "src": "/favicon.ico", "sizes": "48x48", "type": "image/x-icon" }
+        { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+        { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
     ]
 }

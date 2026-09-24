@@ -9,38 +9,45 @@
     $completedCount = $jobs->filter(fn ($job) => in_array($job->status->value, ['COMPLETED', 'VERIFIED'], true))->count();
     $todayCount = $jobs->filter(fn ($job) => $job->scheduled_at?->isToday())->count();
     $nextJob = $jobs->first(fn ($job) => ! in_array($job->status->value, ['COMPLETED', 'VERIFIED'], true));
+    $firstName = trim((string) str(auth()->user()?->name)->before(' '));
+    $greeting = match (true) { now()->hour < 12 => 'Good morning', now()->hour < 17 => 'Good afternoon', default => 'Good evening' };
 @endphp
 
 @push('head')
 <style>
-    .technician-home .home-hero { position: relative; border: 0; background: linear-gradient(125deg, #082442 0%, #0b5aa8 65%, #168bb2 100%); color: #fff; }
+    .technician-home .home-hero { position: relative; border: 0; background: radial-gradient(circle at 90% 10%, rgba(119, 231, 242, .28), transparent 24rem), linear-gradient(125deg, #09213d 0%, #104f88 64%, #147d9d 100%); color: #fff; box-shadow: 0 1.25rem 2.75rem rgba(9, 50, 88, .19); }
     .technician-home .home-hero::after { content: ''; position: absolute; width: 18rem; height: 18rem; border: 1px solid rgba(255,255,255,.15); border-radius: 50%; right: -5rem; top: -9rem; box-shadow: 0 0 0 4rem rgba(255,255,255,.035); pointer-events: none; }
     .technician-home .home-hero .card-body { position: relative; z-index: 1; }
     .technician-home .home-hero .hero-muted { color: rgba(255, 255, 255, .75); }
     .technician-home .hero-kicker { letter-spacing: .14em; color: #91e9ff; }
-    .technician-home .hero-stat { border: 1px solid rgba(255,255,255,.17); background: rgba(255,255,255,.1); backdrop-filter: blur(5px); }
+    .technician-home .hero-stat { border: 1px solid rgba(255,255,255,.21); background: rgba(255,255,255,.1); backdrop-filter: blur(5px); }
+    .technician-home .hero-stat-icon { display: inline-grid; width: 2rem; height: 2rem; place-items: center; border-radius: .6rem; background: rgba(255,255,255,.16); color: #a4f2ff; }
+    .technician-home .home-hero h1 { max-width: 40rem; letter-spacing: -.045em; line-height: 1.1; }
     .technician-home .summary-icon { width: 2.8rem; height: 2.8rem; display: inline-grid; place-items: center; border-radius: .85rem; background: #eaf4ff; color: #0d6efd; font-size: 1.35rem; }
     .technician-home .summary-card { min-height: 8rem; border: 1px solid #dce9f6; box-shadow: 0 8px 24px rgba(13,47,87,.04); }
+    .technician-home .row > :nth-child(2) > .summary-card .summary-icon { background: #e9f7f7; color: #0d8c9c; }
+    .technician-home .row > :nth-child(3) > .summary-card .summary-icon { background: #fff3e3; color: #b87318; }
+    .technician-home .row > :nth-child(4) > .summary-card .summary-icon { background: #e9f8ef; color: #19865e; }
     .technician-home .job-progress { height: .4rem; min-width: 6rem; }
     .technician-home .table td { vertical-align: middle; }
     .technician-home .job-number { letter-spacing: .02em; }
     .technician-home .section-heading { border-left: 4px solid #0d6efd; padding-left: .75rem; }
     .technician-home .attendance-panel { background: #f5f9ff; border: 1px solid #dceafb; border-radius: .85rem; }
-    .technician-home .priority-card { border: 1px solid #b8d9f7; background: linear-gradient(115deg, #f2f9ff, #fff); }
+    .technician-home .priority-card { border: 1px solid #b8d9f7; border-left: 4px solid #1583bd; background: linear-gradient(115deg, #f2f9ff, #fff); box-shadow: 0 .6rem 1.8rem rgba(16, 82, 138, .055); }
     .technician-home .job-mobile-card { border: 1px solid #dce9f6; border-radius: 1.1rem; background: #fff; box-shadow: 0 6px 18px rgba(15,53,95,.045); }
     .technician-home .job-mobile-card.is-new { border-color: #e8c774; background: linear-gradient(130deg, #fffaf0, #fff); }
     .technician-home .job-mobile-card .job-progress { height: .45rem; }
     .technician-home .utility-card { border: 1px solid #dce9f6; }
-    @media (max-width: 575.98px) { .technician-home .home-hero .card-body { padding: 1.4rem !important; } .technician-home .summary-card .card-body { padding: .9rem !important; } .technician-home .summary-card { min-height: 7rem; } .technician-home .summary-card .h3 { font-size: 1.35rem; } }
+    @media (max-width: 575.98px) { .technician-home .home-hero .card-body { padding: 1.4rem !important; } .technician-home .home-hero h1 { font-size: 2rem; } .technician-home .summary-card .card-body { padding: .9rem !important; } .technician-home .summary-card { min-height: 7rem; } .technician-home .summary-card .h3 { font-size: 1.35rem; } .technician-home .hero-stat { padding: .75rem !important; } .technician-home .hero-stat strong { font-size: .88rem !important; } }
 </style>
 @endpush
 
 @section('content')
 <div class="technician-home mx-auto" style="max-width: 1320px">
     <div class="card content-card home-hero overflow-hidden mb-4"><div class="card-body p-4 p-md-5">
-        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap"><div><div class="hero-kicker fw-bold small text-uppercase mb-1">Field service workspace</div><h1 class="display-6 fw-bold mb-1">Ready for your workday?</h1><div class="hero-muted">{{ now()->format('l, d F Y') }} · {{ $profile?->branch?->name ?? 'Branch not configured' }}</div></div><div class="d-flex flex-wrap gap-2"><span class="badge rounded-pill bg-white text-primary px-3 py-2" data-connectivity>Checking connection</span><span class="badge rounded-pill bg-{{ $profile?->is_available ? 'success' : 'secondary' }} px-3 py-2"><i class="bi bi-circle-fill me-1" style="font-size: .5rem"></i>{{ $profile?->is_available ? 'Available' : 'Unavailable' }}</span></div></div>
+        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap"><div><div class="hero-kicker fw-bold small text-uppercase mb-2">Your field desk</div><h1 class="display-6 fw-bold mb-2">{{ $greeting }}, {{ $firstName ?: 'technician' }}.</h1><div class="hero-muted">{{ now()->format('l, d F Y') }} · {{ $profile?->branch?->name ?? 'Branch not configured' }}</div></div><div class="d-flex flex-wrap gap-2"><span class="badge rounded-pill bg-white text-primary px-3 py-2" data-connectivity>Checking connection</span><span class="badge rounded-pill bg-{{ $profile?->is_available ? 'success' : 'secondary' }} px-3 py-2"><i class="bi bi-circle-fill me-1" style="font-size: .5rem"></i>{{ $profile?->is_available ? 'Available' : 'Unavailable' }}</span></div></div>
         <div class="d-flex flex-wrap gap-2 mt-4"><a class="btn btn-info fw-semibold" href="#assigned-jobs"><i class="bi bi-briefcase me-1"></i>Open my jobs</a><button class="btn btn-outline-light" type="button" data-install-app><i class="bi bi-phone me-1"></i>Install field app</button></div>
-        <div class="row g-3 mt-3"><div class="col-sm-6 col-lg-4"><div class="hero-stat rounded-4 p-3 h-100"><div class="hero-muted small">Next action</div><strong class="fs-5">{{ $waitingCount > 0 ? 'Accept a new job' : ($workingCount > 0 ? 'Continue an active job' : 'All caught up') }}</strong></div></div><div class="col-sm-6 col-lg-4"><div class="hero-stat rounded-4 p-3 h-100"><div class="hero-muted small">Attendance</div><strong class="fs-5">{{ $attendance?->checked_out_at ? 'Shift completed' : ($attendance?->checked_in_at ? 'Checked in' : 'Check in to start') }}</strong></div></div><div class="col-lg-4"><div class="hero-stat rounded-4 p-3 h-100"><div class="hero-muted small">Assigned work</div><strong class="fs-5">{{ $jobs->count() }} {{ str('job')->plural($jobs->count()) }} in your queue</strong></div></div></div>
+        <div class="row g-2 g-sm-3 mt-3"><div class="col-6 col-lg-4"><div class="hero-stat rounded-4 p-3 h-100"><span class="hero-stat-icon mb-2"><i class="bi bi-lightning-charge"></i></span><div class="hero-muted small">Next action</div><strong class="fs-5">{{ $waitingCount > 0 ? 'Accept a new job' : ($workingCount > 0 ? 'Continue an active job' : 'All caught up') }}</strong></div></div><div class="col-6 col-lg-4"><div class="hero-stat rounded-4 p-3 h-100"><span class="hero-stat-icon mb-2"><i class="bi bi-clock-history"></i></span><div class="hero-muted small">Attendance</div><strong class="fs-5">{{ $attendance?->checked_out_at ? 'Shift completed' : ($attendance?->checked_in_at ? 'Checked in' : 'Check in to start') }}</strong></div></div><div class="col-12 col-lg-4"><div class="hero-stat rounded-4 p-3 h-100"><span class="hero-stat-icon mb-2"><i class="bi bi-briefcase"></i></span><div class="hero-muted small">Assigned work</div><strong class="fs-5">{{ $jobs->count() }} {{ str('job')->plural($jobs->count()) }} in your queue</strong></div></div></div>
     </div></div>
 
     <div class="row g-3 mb-4">
@@ -124,8 +131,6 @@
 
 @push('scripts')
 <script>
-let technicianInstallPrompt;
-window.addEventListener('beforeinstallprompt', (event) => { event.preventDefault(); technicianInstallPrompt = event; });
 document.addEventListener('DOMContentLoaded', () => {
     const connectivity = document.querySelector('[data-connectivity]');
     const updateConnectivity = () => {
@@ -136,18 +141,6 @@ document.addEventListener('DOMContentLoaded', () => {
     updateConnectivity();
     window.addEventListener('online', updateConnectivity);
     window.addEventListener('offline', updateConnectivity);
-    document.querySelectorAll('[data-install-app]').forEach((button) => button.addEventListener('click', async () => {
-        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
-            await window.Swal.fire({ icon: 'success', title: 'Already installed', text: 'Your field app is already on your home screen.' });
-            return;
-        }
-        if (technicianInstallPrompt) {
-            await technicianInstallPrompt.prompt();
-            technicianInstallPrompt = null;
-            return;
-        }
-        await window.Swal.fire({ icon: 'info', title: 'Install your field app', text: 'Open your browser menu and choose “Add to Home Screen”. On iPhone, tap Share, then Add to Home Screen.' });
-    }));
     const deviceId = localStorage.getItem('acserv-device-id') || (window.crypto?.randomUUID?.() ?? String(Date.now()));
     localStorage.setItem('acserv-device-id', deviceId);
     document.querySelectorAll('[data-geolocation-form]').forEach((form) => {

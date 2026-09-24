@@ -17,6 +17,16 @@ The application is one Laravel codebase designed for Hostinger shared hosting. I
 
 Phase 2 through Phase 7 development is implemented. This release adds one-page customer-signed invoices, compact job cards, a booking calendar and quick customer creation, purchase/vendor and operational accounts/P&L, employee/pay-grade and salary-slip management, customer-feedback follow-up, richer customer/technician PWA screens, OneSignal web push, and expanded installer demo data. Hostinger remains the deployment target; live SMTP/UPI/OneSignal credentials and browser sign-off still require the real server.
 
+## September 24 UI and update release
+
+- [x] Replace the oversized Android install alert with a compact platform-specific sheet, valid 192/512px PWA icons, and native installation when Chrome offers it.
+- [x] Redesign the responsive public website and improve technician/customer mobile presentation and admin dashboard/pipeline styling.
+- [x] Add an owner-and-private-key-gated ZIP updater with manifest/hash/path validation, staged review, scheduler apply, protected `.env`/uploads/server entry files, pending migrations, and code backups.
+- [x] Add a release-package builder command and update the Hostinger installation guide for non-reinstall updates.
+- [x] Pass 77 local tests and 515 assertions after the UI/updater changes.
+- [ ] Deploy this first updater release to Hostinger after a full MySQL backup and confirmation that hPanel Git auto-deploy cannot publish the private Laravel repository into `public_html`.
+- [ ] Retest the live Android install prompt and responsive website after deployment.
+
 ## Guided field-job enhancement
 
 - [x] Dispatch notifications and technician acceptance before any on-site work.

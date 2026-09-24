@@ -2,6 +2,7 @@
 
 return [
     'public_tenant_slug' => env('PUBLIC_TENANT_SLUG', 'acserv-demo'),
+    'update_web_root' => env('ACSERV_WEB_ROOT'),
 
     'demo_login' => [
         'workspace' => env('DEMO_WORKSPACE', 'acserv-demo'),

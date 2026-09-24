@@ -54,6 +54,10 @@
                     @if (auth()->user()->role->canManageContent())
                         <a class="nav-link {{ request()->routeIs('admin.cms.*') ? 'active' : '' }}" href="{{ route('admin.cms.index') }}"><i class="bi bi-layout-text-window" aria-hidden="true"></i>Website CMS</a>
                     @endif
+                    @if (auth()->user()->role === \App\Enums\Role::Owner && auth()->user()->tenant?->slug === config('acserv.public_tenant_slug'))
+                        <span class="admin-nav-label mt-3">System</span>
+                        <a class="nav-link {{ request()->routeIs('admin.system-updates.*') ? 'active' : '' }}" href="{{ route('admin.system-updates.index') }}"><i class="bi bi-cloud-arrow-up" aria-hidden="true"></i>Application updates</a>
+                    @endif
                 </nav>
                 <div class="admin-sidebar-footer mt-auto pt-4">
                     <div class="d-flex align-items-center gap-3 mb-3"><span class="admin-avatar">{{ str(auth()->user()->first_name)->substr(0, 1)->upper() }}</span><span class="min-width-0"><strong class="d-block text-truncate">{{ auth()->user()->name }}</strong><small class="d-block text-white-50">{{ str(auth()->user()->role->value)->headline() }}</small></span></div>
