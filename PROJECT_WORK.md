@@ -24,7 +24,8 @@ Phase 2 through Phase 7 development is implemented. This release adds one-page c
 - [x] Add an owner-and-private-key-gated ZIP updater with manifest/hash/path validation, staged review, scheduler apply, protected `.env`/uploads/server entry files, pending migrations, and code backups.
 - [x] Add a release-package builder command and update the Hostinger installation guide for non-reinstall updates.
 - [x] Pass 77 local tests and 515 assertions after the UI/updater changes.
-- [ ] Deploy this first updater release to Hostinger after a full MySQL backup and confirmation that hPanel Git auto-deploy cannot publish the private Laravel repository into `public_html`.
+- [x] Push and deploy the first updater release to Hostinger after verified full MySQL and application-file backups; the public web root contains only public assets and the preserved entry configuration.
+- [ ] Configure the one-minute Hostinger Custom cron job for Laravel `schedule:run`.
 - [ ] Retest the live Android install prompt and responsive website after deployment.
 
 ## Guided field-job enhancement
